@@ -8,6 +8,7 @@ tmp
 .nyc_output
 *.sublime-*
 .externalToolBuilders
+**/bolt/bootstrap*.js
 *~
 *.diff
 *.patch
@@ -28,8 +29,14 @@ tinymcespellchecker
 a11ychecker
 codemirror
 mentions
-**/bolt/bootstrap*.js
+*.min.js
+*.dev.js
+*.full.js
+*.min.css
+*.dev.less
+**/dist
 **/scratch
 **/lib
 **/dependency
 **/instrumented_*
+.rpt2_cache
