@@ -97,3 +97,32 @@ __How to Contribute to the Docs__
 Docs are hosted on Github in the [tinymce-docs](https://github.com/tinymce/tinymce-docs) repo.
 
 [How to contribute](https://www.tinymce.com/docs/advanced/contributing-docs/) to the docs, including a style guide, can be found on the TinyMCE website.
+
+## Updating Accelo Fork
+
+Update our fork with latest tinymce version and push an update.
+
+#### Update our master with upstream
+```
+git checkout master
+git fetch upstream
+git merge upstream/master
+```
+
+You may need to resolve conflicts. Add the accelo version tag onto the end of the tinymce package name. e.g, `4.7.7` becomes `4.7.7-accelo.1`.
+
+Add change log for things we've changed in our fork (`changelog.txt`), commit and push to master.
+
+#### Release with tag
+
+```
+git checkout accelo-releases
+grunt test
+grunt
+```
+
+Commit changes like `Release 4.7.7-accelo.1` and then tag `git tag 4.7.7-accelo.1`.
+
+```
+git push --tags
+```
