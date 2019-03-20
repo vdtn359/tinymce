@@ -1,3 +1,5 @@
+Version 4.9.3-accelo.1 (2019-03-20)
+    Fixed a bug where the toolbar is hidden when focus is changed from one editor to another even though autohide is set to false
 Version 4.9.3 (2019-01-31)
     Added a visualchars_default_state setting to the Visualchars Plugin. Patch contributed by mat3e.
     Fixed a bug where scrolling on a page with more than one editor would cause a ResizeWindow event to fire. #TINY-3247
