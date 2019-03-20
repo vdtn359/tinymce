@@ -121,6 +121,7 @@ const render = function (editor, theme, args) {
     editor.on('nodeChange', reposition);
     editor.on('ResizeWindow', reposition);
     editor.on('activate', show);
+
     editor.nodeChanged();
   };
 
