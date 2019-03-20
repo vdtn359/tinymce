@@ -51,6 +51,7 @@ const registerEvents = function (editor: Editor, selections: Selections, actions
       cellOpt.each(function (domCell) {
         const cell = Element.fromDom(domCell);
         const table = TableLookup.table(cell);
+        // @ts-ignore
         table.bind(function (table) {
 
           const elements = Arr.filter(Elements.fromHtml(e.content), function (content) {
