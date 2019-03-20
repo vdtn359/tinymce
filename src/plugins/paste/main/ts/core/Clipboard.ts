@@ -1,11 +1,8 @@
 /**
- * Clipboard.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Env from 'tinymce/core/api/Env';
@@ -20,6 +17,8 @@ import ProcessFilters from './ProcessFilters';
 import SmartPaste from './SmartPaste';
 import Utils from './Utils';
 import { Editor } from 'tinymce/core/api/Editor';
+import { Cell, Futures, Future, Arr } from '@ephox/katamari';
+import { DataTransfer, ClipboardEvent, HTMLImageElement, Range, Image, Event, DragEvent, navigator, KeyboardEvent, File } from '@ephox/dom-globals';
 
 declare let window: any;
 
@@ -101,7 +100,7 @@ const getDataTransferItems = (dataTransfer: DataTransfer): ClipboardContents => 
  * @return {Object} Object with mime types and data for those mime types.
  */
 const getClipboardContent = (editor: Editor, clipboardEvent: ClipboardEvent) => {
-  const content = getDataTransferItems(clipboardEvent.clipboardData || editor.getDoc().dataTransfer);
+  const content = getDataTransferItems(clipboardEvent.clipboardData || (editor.getDoc() as any).dataTransfer);
 
   // Edge 15 has a broken HTML Clipboard API see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/11877517/
   return Utils.isMsEdge() ? Tools.extend(content, { 'text/html': '' }) : content;
@@ -135,20 +134,15 @@ const extractFilename = (editor: Editor, str: string) => {
   return m ? editor.dom.encode(m[1]) : null;
 };
 
-const pasteImage = (editor: Editor, rng: Range, reader, blob) => {
-  const uniqueId = Utils.createIdGenerator('mceclip');
-  if (rng) {
-    editor.selection.setRng(rng);
-    rng = null;
-  }
+const uniqueId = Utils.createIdGenerator('mceclip');
 
-  const dataUri = reader.result;
-  const base64 = getBase64FromUri(dataUri);
+const pasteImage = (editor: Editor, imageItem) => {
+  const base64 = getBase64FromUri(imageItem.uri);
   const id = uniqueId();
-  const name = editor.settings.images_reuse_filename && blob.name ? extractFilename(editor, blob.name) : id;
+  const name = editor.settings.images_reuse_filename && imageItem.blob.name ? extractFilename(editor, imageItem.blob.name) : id;
   const img = new Image();
 
-  img.src = dataUri;
+  img.src = imageItem.uri;
 
   // TODO: Move the bulk of the cache logic to EditorUpload
   if (isValidDataUriImage(editor.settings, img)) {
@@ -160,7 +154,7 @@ const pasteImage = (editor: Editor, rng: Range, reader, blob) => {
     });
 
     if (!existingBlobInfo) {
-      blobInfo = blobCache.create(id, blob, base64, name);
+      blobInfo = blobCache.create(id, imageItem.blob, base64, name);
       blobCache.add(blobInfo);
     } else {
       blobInfo = existingBlobInfo;
@@ -168,11 +162,35 @@ const pasteImage = (editor: Editor, rng: Range, reader, blob) => {
 
     pasteHtml(editor, '<img src="' + blobInfo.blobUri() + '">', false);
   } else {
-    pasteHtml(editor, '<img src="' + dataUri + '">', false);
+    pasteHtml(editor, '<img src="' + imageItem.uri + '">', false);
   }
 };
 
 const isClipboardEvent = (event: Event): event is ClipboardEvent => event.type === 'paste';
+
+const readBlobsAsDataUris = (items: File[]) => {
+  return Futures.mapM(items, (item: any) => {
+    return Future.nu((resolve) => {
+      const blob = item.getAsFile ? item.getAsFile() : item;
+
+      const reader = new window.FileReader();
+      reader.onload = () => {
+        resolve({
+          blob,
+          uri: reader.result
+        });
+      };
+      reader.readAsDataURL(blob);
+    });
+  });
+};
+
+const getImagesFromDataTransfer = (dataTransfer: DataTransfer) => {
+  const items = dataTransfer.items ? Arr.map(Arr.from(dataTransfer.items), (item) => item.getAsFile()) : [];
+  const files = dataTransfer.files ? Arr.from(dataTransfer.files) : [];
+  const images = Arr.filter(items.length > 0 ? items : files, (file) => /^image\/(jpeg|png|gif|bmp)$/.test(file.type));
+  return images;
+};
 
 /**
  * Checks if the clipboard contains image data if it does it will take that data
@@ -185,32 +203,27 @@ const isClipboardEvent = (event: Event): event is ClipboardEvent => event.type =
 const pasteImageData = (editor, e: ClipboardEvent | DragEvent, rng: Range) => {
   const dataTransfer = isClipboardEvent(e) ? e.clipboardData : e.dataTransfer;
 
-  function processItems(items) {
-    let i, item, reader, hadImage = false;
-
-    if (items) {
-      for (i = 0; i < items.length; i++) {
-        item = items[i];
-
-        if (/^image\/(jpeg|png|gif|bmp)$/.test(item.type)) {
-          const blob = item.getAsFile ? item.getAsFile() : item;
-
-          reader = new window.FileReader();
-          reader.onload = pasteImage.bind(null, editor, rng, reader, blob);
-          reader.readAsDataURL(blob);
-
-          e.preventDefault();
-          hadImage = true;
-        }
-      }
-    }
-
-    return hadImage;
-  }
-
   if (editor.settings.paste_data_images && dataTransfer) {
-    return processItems(dataTransfer.items) || processItems(dataTransfer.files);
+    const images = getImagesFromDataTransfer(dataTransfer);
+
+    if (images.length > 0) {
+      e.preventDefault();
+
+      readBlobsAsDataUris(images).get((blobResults) => {
+        if (rng) {
+          editor.selection.setRng(rng);
+        }
+
+        Arr.each(blobResults, (result) => {
+          pasteImage(editor, result);
+        });
+      });
+
+      return true;
+    }
   }
+
+  return false;
 };
 
 /**
@@ -229,7 +242,7 @@ const isKeyboardPasteEvent = (e: KeyboardEvent) => {
   return (VK.metaKeyPressed(e) && e.keyCode === 86) || (e.shiftKey && e.keyCode === 45);
 };
 
-const registerEventHandlers = (editor: Editor, pasteBin: PasteBin, pasteFormat: string) => {
+const registerEventHandlers = (editor: Editor, pasteBin: PasteBin, pasteFormat: Cell<string>) => {
   let keyboardPasteTimeStamp = 0;
   let keyboardPastePlainTextState;
 
@@ -344,7 +357,7 @@ const registerEventHandlers = (editor: Editor, pasteBin: PasteBin, pasteFormat: 
     const clipboardDelay = new Date().getTime() - clipboardTimer;
 
     const isKeyBoardPaste = (new Date().getTime() - keyboardPasteTimeStamp - clipboardDelay) < 1000;
-    const plainTextMode = pasteFormat === 'text' || keyboardPastePlainTextState;
+    const plainTextMode = pasteFormat.get() === 'text' || keyboardPastePlainTextState;
     let internal = hasContentType(clipboardContent, InternalHtml.internalHtmlMime());
 
     keyboardPastePlainTextState = false;
@@ -414,7 +427,7 @@ const registerEventHandlers = (editor: Editor, pasteBin: PasteBin, pasteFormat: 
  * @private
  */
 
-const registerEventsAndFilters = (editor: Editor, pasteBin: PasteBin, pasteFormat: string) => {
+const registerEventsAndFilters = (editor: Editor, pasteBin: PasteBin, pasteFormat: Cell<string>) => {
   registerEventHandlers(editor, pasteBin, pasteFormat);
   let src;
 
@@ -469,31 +482,3 @@ export {
   hasHtmlOrText,
   hasContentType
 };
-
-// export interface Clipboard {
-//   pasteFormat: string;
-//   pasteHtml: (html: string, internalFlag: boolean) => void;
-//   pasteText: (text: string) => void;
-//   pasteImageData: (e: ClipboardEvent | DragEvent, rng: Range) => boolean;
-//   getDataTransferItems: (dataTransfer: DataTransfer) => ClipboardContents;
-//   hasHtmlOrText: (content: ClipboardContents) => boolean;
-//   hasContentType: (clipboardContent: ClipboardContents, mimeType: string) => boolean;
-// }
-
-// export const Clipboard = (editor): Clipboard => {
-//   const pasteBin = PasteBin(editor);
-
-//   const pasteFormat = Settings.isPasteAsTextEnabled(editor) ? 'text' : 'html';
-
-//   editor.on('preInit', () => registerEventsAndFilters(editor, pasteBin, pasteFormat));
-
-//   return {
-//     pasteFormat,
-//     pasteHtml: (html: string, internalFlag: boolean) => pasteHtml(editor, html, internalFlag),
-//     pasteText: (text: string) => pasteText(editor, text),
-//     pasteImageData: (e: ClipboardEvent | DragEvent, rng: Range) => pasteImageData(editor, e, rng),
-//     getDataTransferItems,
-//     hasHtmlOrText,
-//     hasContentType
-//   };
-// };

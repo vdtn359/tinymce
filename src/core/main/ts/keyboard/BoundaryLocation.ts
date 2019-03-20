@@ -1,19 +1,16 @@
 /**
- * BoundaryLocation.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Adt, Fun, Option, Options } from '@ephox/katamari';
 import CaretFinder from '../caret/CaretFinder';
 import * as CaretUtils from '../caret/CaretUtils';
-import CaretFormat from '../fmt/CaretFormat';
 import InlineUtils from './InlineUtils';
 import LazyEvaluator from '../util/LazyEvaluator';
+import { getParentCaretContainer } from 'tinymce/core/fmt/FormatContainer';
 
 const Location = Adt.generate([
   { before: [ 'element' ] },
@@ -43,7 +40,7 @@ const before = function (isInlineTarget, rootNode, pos) {
 };
 
 const isNotInsideFormatCaretContainer = function (rootNode, elm) {
-  return CaretFormat.getParentCaretContainer(rootNode, elm) === null;
+  return getParentCaretContainer(rootNode, elm) === null;
 };
 
 const findInsideRootInline = function (isInlineTarget, rootNode, pos) {

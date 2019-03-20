@@ -1,17 +1,17 @@
 /**
- * Helpers.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun } from '@ephox/katamari';
 import Tools from 'tinymce/core/api/util/Tools';
-import Util from '../alien/Util';
+import * as Util from '../alien/Util';
 import { getColorPickerCallback } from '../api/Settings';
+import { Editor } from 'tinymce/core/api/Editor';
+import { DOMUtils } from 'tinymce/core/api/dom/DOMUtils';
+import { Node, document } from '@ephox/dom-globals';
 
 /**
  * @class tinymce.table.ui.Helpers
@@ -44,30 +44,47 @@ const buildListItems = function (inputList, itemCallback, startItems?) {
   return appendItems(inputList, startItems || []);
 };
 
-const updateStyleField = function (editor, evt) {
+function styleFieldHasFocus(e) {
+  return e.control.rootControl.find('#style')[0].getEl().isEqualNode(document.activeElement);
+}
+
+const syncAdvancedStyleFields = function (editor: Editor, evt) {
+  if (styleFieldHasFocus(evt)) {
+    updateAdvancedFields(editor, evt);
+  } else {
+    updateStyleField(editor, evt);
+  }
+};
+
+const updateStyleField = function (editor: Editor, evt) {
   const dom = editor.dom;
   const rootControl = evt.control.rootControl;
   const data = rootControl.toJSON();
   const css = dom.parseStyle(data.style);
 
-  if (evt.control.name() === 'style') {
-    rootControl.find('#borderStyle').value(css['border-style'] || '')[0].fire('select');
-    rootControl.find('#borderColor').value(css['border-color'] || '')[0].fire('change');
-    rootControl.find('#backgroundColor').value(css['background-color'] || '')[0].fire('change');
-    rootControl.find('#width').value(css.width || '').fire('change');
-    rootControl.find('#height').value(css.height || '').fire('change');
-  } else {
-    css['border-style'] = data.borderStyle;
-    css['border-color'] = data.borderColor;
-    css['background-color'] = data.backgroundColor;
-    css.width = data.width ? Util.addSizeSuffix(data.width) : '';
-    css.height = data.height ? Util.addSizeSuffix(data.height) : '';
-  }
+  css['border-style'] = data.borderStyle;
+  css['border-color'] = data.borderColor;
+  css['background-color'] = data.backgroundColor;
+  css.width = data.width ? Util.addSizeSuffix(data.width) : '';
+  css.height = data.height ? Util.addSizeSuffix(data.height) : '';
 
   rootControl.find('#style').value(dom.serializeStyle(dom.parseStyle(dom.serializeStyle(css))));
 };
 
-const extractAdvancedStyles = function (dom, elm) {
+const updateAdvancedFields = function (editor: Editor, evt) {
+  const dom = editor.dom;
+  const rootControl = evt.control.rootControl;
+  const data = rootControl.toJSON();
+  const css = dom.parseStyle(data.style);
+
+  rootControl.find('#borderStyle').value(css['border-style'] || '');
+  rootControl.find('#borderColor').value(css['border-color'] || '');
+  rootControl.find('#backgroundColor').value(css['background-color'] || '');
+  rootControl.find('#width').value(css.width || '');
+  rootControl.find('#height').value(css.height || '');
+};
+
+const extractAdvancedStyles = function (dom: DOMUtils, elm): Node {
   const css = dom.parseStyle(dom.getAttrib(elm, 'style'));
   const data: any = {};
 
@@ -87,7 +104,7 @@ const extractAdvancedStyles = function (dom, elm) {
   return data;
 };
 
-const createStyleForm = function (editor) {
+const createStyleForm = function (editor: Editor) {
   const createColorPickAction = function () {
     const colorPickerCallback = getColorPickerCallback(editor);
     if (colorPickerCallback) {
@@ -113,9 +130,9 @@ const createStyleForm = function (editor) {
       {
         label: 'Style',
         name: 'style',
-        type: 'textbox'
+        type: 'textbox',
+        onchange: Fun.curry(updateAdvancedFields, editor)
       },
-
       {
         type: 'form',
         padding: 0,
@@ -169,5 +186,7 @@ export default {
   createStyleForm,
   buildListItems,
   updateStyleField,
-  extractAdvancedStyles
+  extractAdvancedStyles,
+  updateAdvancedFields,
+  syncAdvancedStyleFields
 };

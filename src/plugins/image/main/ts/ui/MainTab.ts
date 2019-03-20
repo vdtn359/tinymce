@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import Tools from 'tinymce/core/api/util/Tools';
 import Settings from '../api/Settings';
 import Utils from '../core/Utils';
@@ -34,7 +41,7 @@ const onSrcChange = function (evt, editor) {
       if (data.width && data.height && Settings.hasDimensions(editor)) {
         rootControl.find('#width').value(data.width);
         rootControl.find('#height').value(data.height);
-        SizeManager.updateSize(rootControl);
+        SizeManager.syncSize(rootControl);
       }
     });
   }

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { GuiFactory } from '@ephox/alloy';
 import { ValueSchema } from '@ephox/boulder';
 import { Fun } from '@ephox/katamari';
@@ -6,7 +13,15 @@ import MobileSchema from './MobileSchema';
 import IosMode from '../ios/core/IosMode';
 import TapToEditMask from '../touch/view/TapToEditMask';
 
-const produce = function (raw) {
+export interface MobileWebApp {
+  setReadOnly(): void;
+  refreshStructure(): void;
+  enter(): void;
+  exit(): void;
+  destroy(): void;
+}
+
+const produce = function (raw: {any}): MobileWebApp {
   const mobile = ValueSchema.asRawOrDie(
     'Getting IosWebapp schema',
     MobileSchema,
@@ -15,10 +30,10 @@ const produce = function (raw) {
 
   /* Make the toolbar */
   Css.set(mobile.toolstrip, 'width', '100%');
-
   Css.set(mobile.container, 'position', 'relative');
+
   const onView = function () {
-    mobile.setReadOnly(true);
+    mobile.setReadOnly(mobile.readOnlyOnInit());
     mode.enter();
   };
 
@@ -43,7 +58,7 @@ const produce = function (raw) {
     refreshStructure: mode.refreshStructure,
     enter: mode.enter,
     exit: mode.exit,
-    destroy: Fun.noop
+    destroy: Fun.noop  // TODO: lifecycle hookup
   };
 };
 

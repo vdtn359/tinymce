@@ -1,19 +1,21 @@
 /**
- * Selections.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { TableSelection } from '@ephox/darwin';
-import Util from '../alien/Util';
+import * as Util from '../alien/Util';
 import Ephemera from './Ephemera';
 import SelectionTypes from './SelectionTypes';
+import { Editor } from 'tinymce/core/api/Editor';
 
-export default function (editor) {
+export interface Selections {
+  get: () => any;
+}
+
+export const Selections = function (editor: Editor) {
   const get = function () {
     const body = Util.getBody(editor);
 
@@ -31,4 +33,4 @@ export default function (editor) {
   return {
     get
   };
-}
+};

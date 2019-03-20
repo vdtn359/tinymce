@@ -1,11 +1,8 @@
 /**
- * InitIframe.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Element, Attr, Css } from '@ephox/sugar';
@@ -14,6 +11,7 @@ import Settings from '../api/Settings';
 import DOMUtils from '../api/dom/DOMUtils';
 import InitContentBody from './InitContentBody';
 import Uuid from '../util/Uuid';
+import { document, window } from '@ephox/dom-globals';
 
 const DOM = DOMUtils.DOM;
 
@@ -126,7 +124,7 @@ const init = function (editor, boxInfo) {
   }
 
   editor.getElement().style.display = 'none';
-  DOM.setAttrib(editor.id, 'aria-hidden', true);
+  DOM.setAttrib(editor.id, 'aria-hidden', 'true');
 
   if (!isDomainRelaxed) {
     InitContentBody.initContentBody(editor);

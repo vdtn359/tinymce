@@ -1,8 +1,15 @@
-import { AlloyEvents, Button, Memento, NativeEvents } from '@ephox/alloy';
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
+import { AlloyEvents, Button, Memento, NativeEvents, SketchSpec } from '@ephox/alloy';
 import { BlobConversions } from '@ephox/imagetools';
 import { Id, Option } from '@ephox/katamari';
 
-import UiDomFactory from '../util/UiDomFactory';
+import * as UiDomFactory from '../util/UiDomFactory';
 
 const addImage = function (editor, blob) {
   BlobConversions.blobToBase64(blob).then(function (base64) {
@@ -26,7 +33,7 @@ const extractBlob = function (simulatedEvent) {
   return Option.from(files[0]);
 };
 
-const sketch = function (editor) {
+const sketch = function (editor): SketchSpec {
   const pickerDom = {
     tag: 'input',
     attributes: { accept: 'image/*', type: 'file', title: '' },
@@ -62,6 +69,6 @@ const sketch = function (editor) {
   });
 };
 
-export default {
+export {
   sketch
 };

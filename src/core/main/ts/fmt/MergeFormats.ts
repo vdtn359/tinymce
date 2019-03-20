@@ -1,27 +1,24 @@
 /**
- * MergeFormats.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun } from '@ephox/katamari';
-import Bookmarks from '../dom/Bookmarks';
+import Bookmarks from '../bookmark/Bookmarks';
 import ElementUtils from '../api/dom/ElementUtils';
 import NodeType from '../dom/NodeType';
-import CaretFormat from './CaretFormat';
 import FormatUtils from './FormatUtils';
 import MatchFormat from './MatchFormat';
 import RemoveFormat from './RemoveFormat';
 import Tools from '../api/util/Tools';
+import { isCaretNode } from 'tinymce/core/fmt/FormatContainer';
 
 const each = Tools.each;
 
 const isElementNode = function (node) {
-  return node && node.nodeType === 1 && !Bookmarks.isBookmarkNode(node) && !CaretFormat.isCaretNode(node) && !NodeType.isBogus(node);
+  return node && node.nodeType === 1 && !Bookmarks.isBookmarkNode(node) && !isCaretNode(node) && !NodeType.isBogus(node);
 };
 
 const findElementSibling = function (node, siblingName) {

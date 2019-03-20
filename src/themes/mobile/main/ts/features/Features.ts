@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { Behaviour, Receiving, Toggling } from '@ephox/alloy';
 import { Objects } from '@ephox/boulder';
 import { Arr, Option, Type } from '@ephox/katamari';
@@ -7,9 +14,9 @@ import TinyChannels from '../channels/TinyChannels';
 import Styles from '../style/Styles';
 import Buttons from '../ui/Buttons';
 import ColorSlider from '../ui/ColorSlider';
-import FontSizeSlider from '../ui/FontSizeSlider';
-import ImagePicker from '../ui/ImagePicker';
-import LinkButton from '../ui/LinkButton';
+import * as FontSizeSlider from '../ui/FontSizeSlider';
+import * as ImagePicker from '../ui/ImagePicker';
+import * as LinkButton from '../ui/LinkButton';
 import StyleFormats from '../util/StyleFormats';
 
 const defaults = [ 'undo', 'bold', 'italic', 'link', 'image', 'bullist', 'styleselect' ];

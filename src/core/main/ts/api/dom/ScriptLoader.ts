@@ -1,15 +1,13 @@
 /**
- * ScriptLoader.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DOMUtils from './DOMUtils';
 import Tools from '../util/Tools';
+import { document } from '@ephox/dom-globals';
 
 /*globals console*/
 
@@ -91,7 +89,7 @@ const ScriptLoader: any = function () {
         failure();
       } else {
         // Report the error so it's easier for people to spot loading errors
-        if (typeof console !== 'undefined' && console.log) {
+        if (typeof console !== 'undefined' && console.log) { // tslint:disable-line:no-console
           // tslint:disable-next-line:no-console
           console.log('Failed to load script: ' + url);
         }
@@ -106,16 +104,7 @@ const ScriptLoader: any = function () {
     elm.type = 'text/javascript';
     elm.src = Tools._addCacheSuffix(url);
 
-    // Seems that onreadystatechange works better on IE 10 onload seems to fire incorrectly
-    if ('onreadystatechange' in elm) {
-      elm.onreadystatechange = function () {
-        if (/loaded|complete/.test(elm.readyState)) {
-          done();
-        }
-      };
-    } else {
-      elm.onload = done;
-    }
+    elm.onload = done;
 
     // Add onerror event will get fired on some browsers but not all of them
     elm.onerror = error;

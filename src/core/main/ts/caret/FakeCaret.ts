@@ -1,34 +1,41 @@
 /**
- * FakeCaret.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import * as CaretContainer from './CaretContainer';
 import CaretContainerRemove from './CaretContainerRemove';
 import DomQuery from '../api/dom/DomQuery';
 import NodeType from '../dom/NodeType';
-import * as ClientRect from '../geom/ClientRect';
+import * as GeomClientRect from '../geom/ClientRect';
 import Delay from '../api/util/Delay';
-import { isFakeCaretTableBrowser } from '../keyboard/TableNavigation';
+import { Cell, Option } from '@ephox/katamari';
+import { Element, Range, HTMLElement, ClientRect, Node } from '@ephox/dom-globals';
+import { PlatformDetection } from '@ephox/sand';
 
 export interface FakeCaret {
-  show: (before: boolean, element: HTMLElement) => Range;
+  show: (before: boolean, element: Element) => Range;
   hide: () => void;
   getCss: () => string;
+  reposition: () => void;
   destroy: () => void;
 }
 
+interface CaretState {
+  caret: HTMLElement;
+  element: HTMLElement;
+  before: boolean;
+}
+
+const browser = PlatformDetection.detect().browser;
+
 const isContentEditableFalse = NodeType.isContentEditableFalse;
 const isTableCell = (node: Node) => NodeType.isElement(node) && /^(TD|TH)$/i.test(node.tagName);
-const hasFocus = (root: Node) => root.ownerDocument.activeElement === root;
 
 const getAbsoluteClientRect = (root: HTMLElement, element: HTMLElement, before: boolean): ClientRect => {
-  const clientRect = ClientRect.collapse(element.getBoundingClientRect(), before);
+  const clientRect = GeomClientRect.collapse(element.getBoundingClientRect(), before);
   let docElm, scrollX, scrollY, margin, rootRect;
 
   if (root.tagName === 'BODY') {
@@ -92,8 +99,9 @@ const trimInlineCaretContainers = (root: Node): void => {
   }
 };
 
-export const FakeCaret = (root: HTMLElement, isBlock: (node: Node) => boolean): FakeCaret => {
-  let cursorInterval, $lastVisualCaret = null, caretContainerNode;
+export const FakeCaret = (root: HTMLElement, isBlock: (node: Node) => boolean, hasFocus: () => boolean): FakeCaret => {
+  const lastVisualCaret = Cell<Option<CaretState>>(Option.none());
+  let cursorInterval, caretContainerNode;
 
   const show = (before: boolean, element: HTMLElement): Range => {
     let clientRect, rng;
@@ -109,11 +117,14 @@ export const FakeCaret = (root: HTMLElement, isBlock: (node: Node) => boolean): 
       clientRect = getAbsoluteClientRect(root, element, before);
       DomQuery(caretContainerNode).css('top', clientRect.top);
 
-      $lastVisualCaret = DomQuery('<div class="mce-visual-caret" data-mce-bogus="all"></div>').css(clientRect).appendTo(root);
+      const caret = DomQuery('<div class="mce-visual-caret" data-mce-bogus="all"></div>').css(clientRect).appendTo(root)[0];
+      lastVisualCaret.set(Option.some({ caret, element, before }));
 
-      if (before) {
-        $lastVisualCaret.addClass('mce-visual-caret-before');
-      }
+      lastVisualCaret.get().each((caretState) => {
+        if (before) {
+          DomQuery(caretState.caret).addClass('mce-visual-caret-before');
+        }
+      });
 
       startBlink();
 
@@ -146,22 +157,29 @@ export const FakeCaret = (root: HTMLElement, isBlock: (node: Node) => boolean): 
       caretContainerNode = null;
     }
 
-    if ($lastVisualCaret) {
-      $lastVisualCaret.remove();
-      $lastVisualCaret = null;
-    }
+    lastVisualCaret.get().each((caretState) => {
+      DomQuery(caretState.caret).remove();
+      lastVisualCaret.set(Option.none());
+    });
 
     clearInterval(cursorInterval);
   };
 
   const startBlink = () => {
     cursorInterval = Delay.setInterval(() => {
-      if (hasFocus(root)) {
+      if (hasFocus()) {
         DomQuery('div.mce-visual-caret', root).toggleClass('mce-visual-caret-hidden');
       } else {
         DomQuery('div.mce-visual-caret', root).addClass('mce-visual-caret-hidden');
       }
     }, 500);
+  };
+
+  const reposition = () => {
+    lastVisualCaret.get().each((caretState) => {
+      const clientRect = getAbsoluteClientRect(root, caretState.element, caretState.before);
+      DomQuery(caretState.caret).css(clientRect);
+    });
   };
 
   const destroy = () => Delay.clearInterval(cursorInterval);
@@ -192,8 +210,11 @@ export const FakeCaret = (root: HTMLElement, isBlock: (node: Node) => boolean): 
     show,
     hide,
     getCss,
+    reposition,
     destroy
   };
 };
 
-export const isFakeCaretTarget = (node: Node) => isContentEditableFalse(node) || (NodeType.isTable(node) && isFakeCaretTableBrowser());
+export const isFakeCaretTableBrowser = (): boolean => browser.isIE() || browser.isEdge() || browser.isFirefox();
+
+export const isFakeCaretTarget = (node: Node): boolean => isContentEditableFalse(node) || (NodeType.isTable(node) && isFakeCaretTableBrowser());

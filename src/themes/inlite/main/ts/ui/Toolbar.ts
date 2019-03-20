@@ -1,18 +1,16 @@
 /**
- * Toolbar.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Tools from 'tinymce/core/api/util/Tools';
 import Factory from 'tinymce/core/api/ui/Factory';
 import Type from '../alien/Type';
+import { Editor } from 'tinymce/core/api/Editor';
 
-const getSelectorStateResult = function (itemName, item) {
+const getSelectorStateResult = function (itemName: string, item) {
   const result = function (selector, handler) {
     return {
       selector,
@@ -39,7 +37,7 @@ const getSelectorStateResult = function (itemName, item) {
   return null;
 };
 
-const bindSelectorChanged = function (editor, itemName, item) {
+const bindSelectorChanged = function (editor: Editor, itemName: string, item) {
   return function () {
     const result = getSelectorStateResult(itemName, item);
     if (result !== null) {
@@ -48,7 +46,7 @@ const bindSelectorChanged = function (editor, itemName, item) {
   };
 };
 
-const itemsToArray = function (items) {
+const itemsToArray = function (items: string | string[]): string[] {
   if (Type.isArray(items)) {
     return items;
   } else if (Type.isString(items)) {
@@ -58,7 +56,7 @@ const itemsToArray = function (items) {
   return [];
 };
 
-const create = function (editor, name, items) {
+const create = function (editor: Editor, name: string, items: string | string[]) {
   const toolbarItems = [];
   let buttonGroup;
 
@@ -66,9 +64,7 @@ const create = function (editor, name, items) {
     return;
   }
 
-  Tools.each(itemsToArray(items), function (item) {
-    let itemName;
-
+  Tools.each(itemsToArray(items), function (item: string) {
     if (item === '|') {
       buttonGroup = null;
     } else {
@@ -78,18 +74,17 @@ const create = function (editor, name, items) {
           toolbarItems.push(buttonGroup);
         }
 
-        itemName = item;
-        item = editor.buttons[itemName];
+        let button = editor.buttons[item];
 
-        if (typeof item === 'function') {
-          item = item();
+        if (Type.isFunction(button)) {
+          button = button();
         }
 
-        item.type = item.type || 'button';
+        button.type = button.type || 'button';
 
-        item = Factory.create(item);
-        item.on('postRender', bindSelectorChanged(editor, itemName, item));
-        buttonGroup.items.push(item);
+        button = Factory.create(button);
+        button.on('postRender', bindSelectorChanged(editor, item, button));
+        buttonGroup.items.push(button);
       }
     }
   });

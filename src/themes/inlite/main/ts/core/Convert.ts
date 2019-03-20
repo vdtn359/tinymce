@@ -1,14 +1,14 @@
 /**
- * Convert.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-const fromClientRect = function (clientRect) {
+import { GeomRect } from 'tinymce/core/api/geom/Rect';
+import { ClientRect } from '@ephox/dom-globals';
+
+const fromClientRect = function (clientRect: Partial<ClientRect>): GeomRect {
   return {
     x: clientRect.left,
     y: clientRect.top,
@@ -17,7 +17,7 @@ const fromClientRect = function (clientRect) {
   };
 };
 
-const toClientRect = function (geomRect) {
+const toClientRect = function (geomRect: GeomRect): ClientRect {
   return {
     left: geomRect.x,
     top: geomRect.y,

@@ -1,18 +1,16 @@
 /**
- * RangeNormalizer.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import CaretFinder from '../caret/CaretFinder';
 import CaretPosition from '../caret/CaretPosition';
 import * as CaretUtils from '../caret/CaretUtils';
+import { Node, Range, document } from '@ephox/dom-globals';
 
-const createRange = function (sc, so, ec, eo) {
+const createRange = (sc: Node, so: number, ec: Node, eo: number): Range => {
   const rng = document.createRange();
   rng.setStart(sc, so);
   rng.setEnd(ec, eo);
@@ -26,7 +24,7 @@ const createRange = function (sc, so, ec, eo) {
 // We would want it to be:
 //   <blockquote><p>[a]</p></blockquote><p>b</p>
 // Since it would otherwise produces spans out of thin air on insertContent for example.
-const normalizeBlockSelectionRange = function (rng) {
+const normalizeBlockSelectionRange = (rng: Range): Range => {
   const startPos = CaretPosition.fromRangeStart(rng);
   const endPos = CaretPosition.fromRangeEnd(rng);
   const rootNode = rng.commonAncestorContainer;
@@ -41,13 +39,7 @@ const normalizeBlockSelectionRange = function (rng) {
     }).getOr(rng);
 };
 
-const normalizeBlockSelection = function (rng) {
-  return rng.collapsed ? rng : normalizeBlockSelectionRange(rng);
-};
-
-const normalize = function (rng) {
-  return normalizeBlockSelection(rng);
-};
+const normalize = (rng: Range): Range => rng.collapsed ? rng : normalizeBlockSelectionRange(rng);
 
 export default {
   normalize

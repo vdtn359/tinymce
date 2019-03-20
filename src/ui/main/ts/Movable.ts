@@ -1,15 +1,13 @@
 /**
- * Movable.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DomUtils from './DomUtils';
 import UiContainer from 'tinymce/ui/UiContainer';
+import { Element, document, window } from '@ephox/dom-globals';
 
 /**
  * Movable mixin. Makes controls movable absolute and relative to other elements.
@@ -23,7 +21,7 @@ const isFixed = (ctrl) => ctrl.state.get('fixed');
 function calculateRelativePosition(ctrl, targetElm, rel) {
   let ctrlElm, pos, x, y, selfW, selfH, targetW, targetH, viewport, size;
 
-  viewport = getDocumentViewPort();
+  viewport = getWindowViewPort();
 
   // Get pos of target
   pos = DomUtils.getPos(targetElm, UiContainer.getUiContainer(ctrl));
@@ -100,18 +98,34 @@ const getUiContainerViewPort = (customUiContainer) => {
   };
 };
 
-const getDocumentViewPort = () => {
+// It seems that people are relying on the fact that we contrain to the visible window viewport instead of the document viewport
+// const getDocumentViewPort = () => {
+//   return {
+//     x: Math.max(document.body.scrollLeft, document.documentElement.scrollLeft),
+//     y: Math.max(document.body.scrollTop, document.documentElement.scrollTop),
+//     w: Math.max(document.body.scrollWidth, document.documentElement.scrollWidth, document.defaultView.innerWidth),
+//     h: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.defaultView.innerHeight)
+//   };
+// };
+
+const getWindowViewPort = () => {
+  const win = window;
+  const x = Math.max(win.pageXOffset, document.body.scrollLeft, document.documentElement.scrollLeft);
+  const y = Math.max(win.pageYOffset, document.body.scrollTop, document.documentElement.scrollTop);
+  const w = win.innerWidth || document.documentElement.clientWidth;
+  const h = win.innerHeight || document.documentElement.clientHeight;
+
   return {
-    x: 0,
-    y: 0,
-    w: Math.max(document.body.scrollWidth, document.documentElement.scrollWidth, document.defaultView.innerWidth),
-    h: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.defaultView.innerHeight)
+    x,
+    y,
+    w,
+    h
   };
 };
 
 const getViewPortRect = (ctrl) => {
   const customUiContainer = UiContainer.getUiContainer(ctrl);
-  return customUiContainer && !isFixed(ctrl) ? getUiContainerViewPort(customUiContainer) : getDocumentViewPort();
+  return customUiContainer && !isFixed(ctrl) ? getUiContainerViewPort(customUiContainer) : getWindowViewPort();
 };
 
 export default {
@@ -134,8 +148,7 @@ export default {
           return rels[i];
         }
       } else {
-        if (pos.x > viewPortRect.x && pos.x + pos.w < viewPortRect.w + viewPortRect.x &&
-          pos.y > viewPortRect.y && pos.y + pos.h < viewPortRect.h + viewPortRect.y) {
+        if (pos.x > viewPortRect.x && pos.x + pos.w < viewPortRect.w + viewPortRect.x && pos.y > viewPortRect.y && pos.y + pos.h < viewPortRect.h + viewPortRect.y) {
           return rels[i];
         }
       }

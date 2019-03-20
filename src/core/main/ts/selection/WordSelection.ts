@@ -1,30 +1,28 @@
 /**
- * WordSelection.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Type } from '@ephox/katamari';
 import * as CaretContainer from '../caret/CaretContainer';
 import CaretPosition from '../caret/CaretPosition';
 import { Selection } from '../api/dom/Selection';
+import { Editor } from 'tinymce/core/api/Editor';
 
-const hasSelectionModifyApi = function (editor) {
-  return Type.isFunction(editor.selection.getSel().modify);
+const hasSelectionModifyApi = function (editor: Editor) {
+  return Type.isFunction((<any> editor.selection.getSel()).modify);
 };
 
-const moveRel = function (forward, selection: Selection, pos) {
+const moveRel = function (forward: boolean, selection: Selection, pos: CaretPosition) {
   const delta = forward ? 1 : -1;
   selection.setRng(CaretPosition(pos.container(), pos.offset() + delta).toRange());
   (<any> selection.getSel()).modify('move', forward ? 'forward' : 'backward', 'word');
   return true;
 };
 
-const moveByWord = function (forward, editor) {
+const moveByWord = function (forward: boolean, editor: Editor) {
   const rng = editor.selection.getRng();
   const pos = forward ? CaretPosition.fromRangeEnd(rng) : CaretPosition.fromRangeStart(rng);
 

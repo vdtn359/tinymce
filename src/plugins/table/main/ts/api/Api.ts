@@ -1,17 +1,15 @@
 /**
- * Api.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2018 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Editor } from 'tinymce/core/api/Editor';
 import InsertTable from '../actions/InsertTable';
-import { Arr, Option } from '@ephox/katamari';
+import { Arr, Option, Cell } from '@ephox/katamari';
 import { Element } from '@ephox/sugar';
+import { HTMLElement } from '@ephox/dom-globals';
 
 const getClipboardRows = (clipboardRows): HTMLElement[] => {
   return clipboardRows.get().fold(function () {
@@ -28,7 +26,7 @@ const setClipboardRows = (rows: HTMLElement[], clipboardRows) => {
   clipboardRows.set(Option.from(sugarRows));
 };
 
-const getApi = (editor: Editor, clipboardRows) => {
+const getApi = (editor: Editor, clipboardRows: Cell<Option<any>>) => {
   return {
     insertTable: (columns: number, rows: number) => {
       return InsertTable.insert(editor, columns, rows);

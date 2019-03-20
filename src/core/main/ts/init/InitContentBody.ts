@@ -1,11 +1,8 @@
 /**
- * InitContentBody.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Insert, Element, Attr } from '@ephox/sugar';
@@ -14,9 +11,9 @@ import ForceBlocks from '../ForceBlocks';
 import NodeChange from '../NodeChange';
 import SelectionOverrides from '../SelectionOverrides';
 import UndoManager from '../api/UndoManager';
+import Annotator from '../api/Annotator';
 import Formatter from '../api/Formatter';
 import Serializer from '../api/dom/Serializer';
-import CaretContainerInput from '../caret/CaretContainerInput';
 import DOMUtils from '../api/dom/DOMUtils';
 import { Selection } from '../api/dom/Selection';
 import DomParser from '../api/html/DomParser';
@@ -26,12 +23,17 @@ import KeyboardOverrides from '../keyboard/KeyboardOverrides';
 import Delay from '../api/util/Delay';
 import Quirks from '../util/Quirks';
 import Tools from '../api/util/Tools';
+import { Editor } from 'tinymce/core/api/Editor';
+import * as MultiClickSelection from 'tinymce/core/selection/MultiClickSelection';
+import * as DetailsElement from '../selection/DetailsElement';
+import { document, window } from '@ephox/dom-globals';
+import Settings from '../api/Settings';
 
 declare const escape: any;
 
 const DOM = DOMUtils.DOM;
 
-const appendStyle = function (editor, text) {
+const appendStyle = function (editor: Editor, text: string) {
   const head = Element.fromDom(editor.getDoc().head);
   const tag = Element.fromTag('style');
   Attr.set(tag, 'type', 'text/css');
@@ -39,7 +41,7 @@ const appendStyle = function (editor, text) {
   Insert.append(head, tag);
 };
 
-const createParser = function (editor) {
+const createParser = function (editor: Editor) {
   const parser = DomParser(editor.settings, editor.schema);
 
   // Convert src and href into data-mce-src, data-mce-href and data-mce-style
@@ -80,7 +82,7 @@ const createParser = function (editor) {
   });
 
   // Keep scripts from executing
-  parser.addNodeFilter('script', function (nodes) {
+  parser.addNodeFilter('script', function (nodes: Node[]) {
     let i = nodes.length, node, type;
 
     while (i--) {
@@ -92,7 +94,7 @@ const createParser = function (editor) {
     }
   });
 
-  parser.addNodeFilter('#cdata', function (nodes) {
+  parser.addNodeFilter('#cdata', function (nodes: Node[]) {
     let i = nodes.length, node;
 
     while (i--) {
@@ -103,7 +105,7 @@ const createParser = function (editor) {
     }
   });
 
-  parser.addNodeFilter('p,h1,h2,h3,h4,h5,h6,div', function (nodes) {
+  parser.addNodeFilter('p,h1,h2,h3,h4,h5,h6,div', function (nodes: Node[]) {
     let i = nodes.length, node;
     const nonEmptyElements = editor.schema.getNonEmptyElements();
 
@@ -119,7 +121,7 @@ const createParser = function (editor) {
   return parser;
 };
 
-const autoFocus = function (editor) {
+const autoFocus = function (editor: Editor) {
   if (editor.settings.auto_focus) {
     Delay.setEditorTimeout(editor, function () {
       let focusEditor;
@@ -137,7 +139,7 @@ const autoFocus = function (editor) {
   }
 };
 
-const initEditor = function (editor) {
+const initEditor = function (editor: Editor) {
   editor.bindPendingEventDelegates();
   editor.initialized = true;
   editor.fire('init');
@@ -147,11 +149,11 @@ const initEditor = function (editor) {
   autoFocus(editor);
 };
 
-const getStyleSheetLoader = function (editor) {
+const getStyleSheetLoader = function (editor: Editor) {
   return editor.inline ? DOM.styleSheetLoader : editor.dom.styleSheetLoader;
 };
 
-const initContentBody = function (editor, skipWrite?) {
+const initContentBody = function (editor: Editor, skipWrite?: boolean) {
   const settings = editor.settings;
   const targetElm = editor.getElement();
   let doc = editor.getDoc(), body, contentCssText;
@@ -206,7 +208,7 @@ const initContentBody = function (editor, skipWrite?) {
 
   editor.editorUpload = EditorUpload(editor);
   editor.schema = Schema(settings);
-  editor.dom = new DOMUtils(doc, {
+  editor.dom = DOMUtils(doc, {
     keep_values: true,
     url_converter: editor.convertURL,
     url_converter_scope: editor,
@@ -216,6 +218,7 @@ const initContentBody = function (editor, skipWrite?) {
     root_element: editor.inline ? editor.getBody() : null,
     collect: settings.content_editable,
     schema: editor.schema,
+    contentCssCors: Settings.shouldUseContentCssCors(editor),
     onSetAttrib (e) {
       editor.fire('SetAttrib', e);
     }
@@ -224,12 +227,14 @@ const initContentBody = function (editor, skipWrite?) {
   editor.parser = createParser(editor);
   editor.serializer = Serializer(settings, editor);
   editor.selection = Selection(editor.dom, editor.getWin(), editor.serializer, editor);
+  editor.annotator = Annotator(editor);
   editor.formatter = Formatter(editor);
   editor.undoManager = UndoManager(editor);
   editor._nodeChangeDispatcher = new NodeChange(editor);
   editor._selectionOverrides = SelectionOverrides(editor);
 
-  CaretContainerInput.setup(editor);
+  DetailsElement.setup(editor);
+  MultiClickSelection.setup(editor);
   KeyboardOverrides.setup(editor);
   ForceBlocks.setup(editor);
 
@@ -265,15 +270,8 @@ const initContentBody = function (editor, skipWrite?) {
     editor.addVisual(editor.getBody());
   });
 
-  // Remove empty contents
-  if (settings.padd_empty_editor) {
-    editor.on('PostProcess', function (e) {
-      e.content = e.content.replace(/^(<p[^>]*>(&nbsp;|&#160;|\s|\u00a0|<br \/>|)<\/p>[\r\n]*|<br \/>[\r\n]*)$/, '');
-    });
-  }
-
   editor.load({ initial: true, format: 'html' });
-  editor.startContent = editor.getContent({ format: 'raw' });
+  editor.startContent = editor.getContent({ format: 'raw' }) as string;
 
   editor.on('compositionstart compositionend', function (e) {
     editor.composing = e.type === 'compositionstart';

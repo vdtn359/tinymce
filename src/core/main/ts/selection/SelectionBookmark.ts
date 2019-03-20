@@ -1,6 +1,14 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { Fun, Option } from '@ephox/katamari';
 import { PlatformDetection } from '@ephox/sand';
 import { Compare, Element, Node, Text, Traverse, Selection } from '@ephox/sugar';
+import { document } from '@ephox/dom-globals';
 
 const browser = PlatformDetection.detect().browser;
 
@@ -35,14 +43,6 @@ const isRngInRoot = function (root) {
   };
 };
 
-// var dumpRng = function (rng) {
-//   console.log('start', rng.start().dom());
-//   console.log('soffset', rng.soffset());
-//   console.log('finish', rng.finish().dom());
-//   console.log('foffset', rng.foffset());
-//   return rng;
-// };
-
 const shouldStore = function (editor) {
   return editor.inline === true || browser.isIE();
 };
@@ -72,10 +72,15 @@ const validate = function (root, bookmark) {
 
 const bookmarkToNativeRng = function (bookmark) {
   const rng = document.createRange();
-  rng.setStart(bookmark.start().dom(), bookmark.soffset());
-  rng.setEnd(bookmark.finish().dom(), bookmark.foffset());
 
-  return Option.some(rng);
+  try {
+    // Might throw IndexSizeError
+    rng.setStart(bookmark.start().dom(), bookmark.soffset());
+    rng.setEnd(bookmark.finish().dom(), bookmark.foffset());
+    return Option.some(rng);
+  } catch (_) {
+    return Option.none();
+  }
 };
 
 const store = function (editor) {

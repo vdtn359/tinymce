@@ -1,26 +1,38 @@
 /**
- * TableActions.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr, Fun, Option } from '@ephox/katamari';
 import {
     CellMutations, TableDirection, TableFill, TableGridSize, TableOperations
 } from '@ephox/snooker';
-import { Attr, Element, Node, SelectorFilter } from '@ephox/sugar';
+import { Element, Node } from '@ephox/sugar';
 
-import Util from '../alien/Util';
+import * as Util from '../alien/Util';
 import Direction from '../queries/Direction';
 import { getCloneElements } from '../api/Settings';
 import { fireNewCell, fireNewRow } from '../api/Events';
+import { Editor } from 'tinymce/core/api/Editor';
 
-export default function (editor, lazyWire) {
-  const isTableBody = function (editor) {
+export interface TableActions {
+  deleteRow: (table: any, target: any) => any;
+  deleteColumn: (table: any, target: any) => any;
+  insertRowsBefore: (table: any, target: any) => any;
+  insertRowsAfter: (table: any, target: any) => any;
+  insertColumnsBefore: (table: any, target: any) => any;
+  insertColumnsAfter: (table: any, target: any) => any;
+  mergeCells: (table: any, target: any) => any;
+  unmergeCells: (table: any, target: any) => any;
+  pasteRowsBefore: (table: any, target: any) => any;
+  pasteRowsAfter: (table: any, target: any) => any;
+  pasteCells: (table: any, target: any) => any;
+}
+
+export const TableActions = function (editor: Editor, lazyWire) {
+  const isTableBody = function (editor: Editor) {
     return Node.name(Util.getBody(editor)) === 'table';
   };
 
@@ -39,10 +51,7 @@ export default function (editor, lazyWire) {
 
   const execute = function (operation, guard, mutate, lazyWire) {
     return function (table, target) {
-      const dataStyleCells = SelectorFilter.descendants(table, 'td[data-mce-style],th[data-mce-style]');
-      Arr.each(dataStyleCells, function (cell) {
-        Attr.remove(cell, 'data-mce-style');
-      });
+      Util.removeDataStyle(table);
       const wire = lazyWire();
       const doc = Element.fromDom(editor.getDoc());
       const direction = TableDirection(Direction.directionAt);
@@ -99,4 +108,4 @@ export default function (editor, lazyWire) {
     pasteRowsAfter,
     pasteCells
   };
-}
+};

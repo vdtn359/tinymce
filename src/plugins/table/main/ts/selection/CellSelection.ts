@@ -1,24 +1,26 @@
 /**
- * CellSelection.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { InputHandlers, SelectionAnnotation, SelectionKeys } from '@ephox/darwin';
 import { Fun, Option, Struct } from '@ephox/katamari';
 import { TableLookup } from '@ephox/snooker';
 import {
-    Attr, Compare, Element, Node, Selection, SelectionDirection, Text, Traverse
+    Element, Selection, SelectionDirection, Class
 } from '@ephox/sugar';
 
-import Util from '../alien/Util';
+import * as Util from '../alien/Util';
 import Direction from '../queries/Direction';
 import Ephemera from './Ephemera';
-import { getForcedRootBlock, getForcedRootBlockAttrs } from '../api/Settings';
+import { DomParent } from '@ephox/robin';
+
+const hasInternalTarget = (e: Event) => {
+  return Class.has(Element.fromDom(e.target as HTMLElement), 'ephox-snooker-resizer-bar') === false;
+};
+import { KeyboardEvent, MouseEvent, Event, HTMLElement } from '@ephox/dom-globals';
 
 export default function (editor, lazyResize) {
   const handlerStruct = Struct.immutableBag(['mousedown', 'mouseover', 'mouseup', 'keyup', 'keydown'], []);
@@ -31,18 +33,14 @@ export default function (editor, lazyResize) {
     const body = Util.getBody(editor);
     const isRoot = Util.getIsRoot(editor);
 
+    // When the selection changes through either the mouse or keyboard, and the selection is no longer within the table.
+    // Remove the selection.
     const syncSelection = function () {
       const sel = editor.selection;
       const start = Element.fromDom(sel.getStart());
       const end = Element.fromDom(sel.getEnd());
-      const startTable = TableLookup.table(start);
-      const endTable = TableLookup.table(end);
-      const sameTable = startTable.bind(function (tableStart) {
-        return endTable.bind(function (tableEnd) {
-          return Compare.eq(tableStart, tableEnd) ? Option.some(true) : Option.none();
-        });
-      });
-      sameTable.fold(function () {
+      const shared = DomParent.sharedOne(TableLookup.table, [start, end]);
+      shared.fold(function () {
         annotations.clear(body);
       }, Fun.noop);
     };
@@ -80,48 +78,11 @@ export default function (editor, lazyResize) {
       }
     };
 
-    const checkLast = function (last) {
-      return !Attr.has(last, 'data-mce-bogus') && Node.name(last) !== 'br' && !(Node.isText(last) && Text.get(last).length === 0);
-    };
-
-    const getLast = function () {
-      const body = Element.fromDom(editor.getBody());
-
-      const lastChild = Traverse.lastChild(body);
-
-      const getPrevLast = function (last) {
-        return Traverse.prevSibling(last).bind(function (prevLast) {
-          return checkLast(prevLast) ? Option.some(prevLast) : getPrevLast(prevLast);
-        });
-      };
-
-      return lastChild.bind(function (last) {
-        return checkLast(last) ? Option.some(last) : getPrevLast(last);
-      });
-    };
-
-    const keydown = function (event) {
+    const keydown = function (event: KeyboardEvent) {
       const wrappedEvent = wrapEvent(event);
       lazyResize().each(function (resize) {
         resize.hideBars();
       });
-
-      if (event.which === 40) {
-        getLast().each(function (last) {
-          if (Node.name(last) === 'table') {
-            if (getForcedRootBlock(editor)) {
-              editor.dom.add(
-                editor.getBody(),
-                getForcedRootBlock(editor),
-                getForcedRootBlockAttrs(editor),
-                '<br/>'
-              );
-            } else {
-              editor.dom.add(editor.getBody(), 'br');
-            }
-          }
-        });
-      }
 
       const rng = editor.selection.getRng();
       const startContainer = Element.fromDom(editor.selection.getStart());
@@ -136,9 +97,11 @@ export default function (editor, lazyResize) {
       });
     };
 
-    const wrapEvent = function (event) {
+    const isMouseEvent = (event: any): event is MouseEvent => event.hasOwnProperty('x') && event.hasOwnProperty('y');
+
+    const wrapEvent = function (event: MouseEvent | KeyboardEvent) {
       // IE9 minimum
-      const target = Element.fromDom(event.target);
+      const target = Element.fromDom(event.target as HTMLElement);
 
       const stop = function () {
         event.stopPropagation();
@@ -153,8 +116,8 @@ export default function (editor, lazyResize) {
       // FIX: Don't just expose the raw event. Need to identify what needs standardisation.
       return {
         target:  Fun.constant(target),
-        x:       Fun.constant(event.x),
-        y:       Fun.constant(event.y),
+        x:       Fun.constant(isMouseEvent(event) ? event.x : null),
+        y:       Fun.constant(isMouseEvent(event) ? event.y : null),
         stop,
         prevent,
         kill,
@@ -162,12 +125,12 @@ export default function (editor, lazyResize) {
       };
     };
 
-    const isLeftMouse = function (raw) {
+    const isLeftMouse = function (raw: MouseEvent) {
       return raw.button === 0;
     };
 
     // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
-    const isLeftButtonPressed = function (raw) {
+    const isLeftButtonPressed = function (raw: MouseEvent) {
       // Only added by Chrome/Firefox in June 2015.
       // This is only to fix a 1px bug (TBIO-2836) so return true if we're on an older browser
       if (raw.buttons === undefined) {
@@ -178,18 +141,18 @@ export default function (editor, lazyResize) {
       return (raw.buttons & 1) !== 0;
     };
 
-    const mouseDown = function (e) {
-      if (isLeftMouse(e)) {
+    const mouseDown = function (e: MouseEvent) {
+      if (isLeftMouse(e) && hasInternalTarget(e)) {
         mouseHandlers.mousedown(wrapEvent(e));
       }
     };
-    const mouseOver = function (e) {
-      if (isLeftButtonPressed(e)) {
+    const mouseOver = function (e: MouseEvent) {
+      if (isLeftButtonPressed(e) && hasInternalTarget(e)) {
         mouseHandlers.mouseover(wrapEvent(e));
       }
     };
-    const mouseUp = function (e) {
-      if (isLeftMouse) {
+    const mouseUp = function (e: MouseEvent) {
+      if (isLeftMouse(e) && hasInternalTarget(e)) {
         mouseHandlers.mouseup(wrapEvent(e));
       }
     };

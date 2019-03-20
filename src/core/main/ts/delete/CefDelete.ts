@@ -1,11 +1,8 @@
 /**
- * CefDelete.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr } from '@ephox/katamari';
@@ -15,6 +12,7 @@ import * as CefDeleteAction from './CefDeleteAction';
 import DeleteElement from './DeleteElement';
 import DeleteUtils from './DeleteUtils';
 import NodeType from '../dom/NodeType';
+import { Editor } from 'tinymce/core/api/Editor';
 
 const deleteElement = function (editor, forward) {
   return function (element) {
@@ -79,7 +77,7 @@ const getContentEditableRoot = function (root, node) {
   return null;
 };
 
-const paddEmptyElement = function (editor) {
+const paddEmptyElement = function (editor: Editor) {
   let br;
   const ceRoot = getContentEditableRoot(editor.getBody(), editor.selection.getNode());
 
@@ -93,7 +91,7 @@ const paddEmptyElement = function (editor) {
   return true;
 };
 
-const backspaceDelete = function (editor, forward) {
+const backspaceDelete = function (editor: Editor, forward) {
   if (editor.selection.isCollapsed()) {
     return backspaceDeleteCaret(editor, forward);
   } else {

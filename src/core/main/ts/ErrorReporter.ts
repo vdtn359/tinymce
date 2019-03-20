@@ -1,14 +1,13 @@
 /**
- * ErrorReporter.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import AddOnManager from './api/AddOnManager';
+import { AddOnManager } from './api/AddOnManager';
+import { window } from '@ephox/dom-globals';
+import I18n from './api/util/I18n';
 
 /**
  * Various error reporting helper functions.
@@ -33,8 +32,8 @@ const resolvePluginName = function (targetUrl, suffix) {
 const pluginUrlToMessage = function (editor, url) {
   const plugin = resolvePluginName(url, editor.suffix);
   return plugin ?
-    'Failed to load plugin: ' + plugin + ' from url ' + url :
-    'Failed to load plugin url: ' + url;
+    I18n.translate(['Failed to load plugin: {0} from url {1}', plugin, url]) :
+    I18n.translate(['Failed to load plugin url: {0}', url]);
 };
 
 const displayNotification = function (editor, message) {
@@ -55,26 +54,33 @@ const displayError = function (editor, message) {
 };
 
 const uploadError = function (editor, message) {
-  displayError(editor, 'Failed to upload image: ' + message);
+  displayError(editor, I18n.translate(['Failed to upload image: {0}', message]));
 };
 
 const pluginLoadError = function (editor, url) {
   displayError(editor, pluginUrlToMessage(editor, url));
 };
 
+const pluginInitError = function (editor, name, err) {
+  const message = I18n.translate(['Failed to initialize plugin: {0}', name]);
+  initError(message, err);
+  displayError(editor, message);
+};
+
 const initError = function (message, ...x: any[]) {
   const console = window.console;
   if (console) { // Skip test env
-    if (console.error) {
-      console.error.apply(console, arguments);
+    if (console.error) { // tslint:disable-line:no-console
+      console.error.apply(console, arguments); // tslint:disable-line:no-console
     } else {
-      console.log.apply(console, arguments);
+      console.log.apply(console, arguments); // tslint:disable-line:no-console
     }
   }
 };
 
 export default {
   pluginLoadError,
+  pluginInitError,
   uploadError,
   displayError,
   initError

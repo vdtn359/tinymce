@@ -5,6 +5,8 @@ import NormalizeRange from 'tinymce/core/selection/NormalizeRange';
 import ViewBlock from '../../module/test/ViewBlock';
 import Zwsp from 'tinymce/core/text/Zwsp';
 import { UnitTest } from '@ephox/bedrock';
+import { document } from '@ephox/dom-globals';
+import { Option } from '@ephox/katamari';
 
 UnitTest.asynctest('browser.tinymce.core.selection.NormalizeRangeTest', function () {
   const success = arguments[arguments.length - 2];
@@ -29,7 +31,7 @@ UnitTest.asynctest('browser.tinymce.core.selection.NormalizeRangeTest', function
   };
 
   const cNormalizeRange = function (startPath, startOffset, endPath, endOffset) {
-    return Chain.mapper(function (viewBlock) {
+    return Chain.mapper(function (viewBlock: any) {
       const sc = Hierarchy.follow(Element.fromDom(viewBlock.get()), startPath).getOrDie();
       const ec = Hierarchy.follow(Element.fromDom(viewBlock.get()), endPath).getOrDie();
       const rng = document.createRange();
@@ -37,7 +39,7 @@ UnitTest.asynctest('browser.tinymce.core.selection.NormalizeRangeTest', function
       rng.setStart(sc.dom(), startOffset);
       rng.setEnd(ec.dom(), endOffset);
 
-      return NormalizeRange.normalize(new DOMUtils(document, { root_element: viewBlock.get() }), rng);
+      return NormalizeRange.normalize(DOMUtils(document, { root_element: viewBlock.get() }), rng);
     });
   };
 
@@ -47,7 +49,7 @@ UnitTest.asynctest('browser.tinymce.core.selection.NormalizeRangeTest', function
     });
   };
 
-  const cAssertRangeNone = Chain.op(function (range) {
+  const cAssertRangeNone = Chain.op(function (range: Option<any>) {
     Assertions.assertEq('Should be none', true, range.isNone());
   });
 
@@ -71,6 +73,11 @@ UnitTest.asynctest('browser.tinymce.core.selection.NormalizeRangeTest', function
       ])),
       Logger.t('Should not normalize into pre', Chain.asStep(viewBlock, [
         cSetHtml('<pre>a</pre>'),
+        cNormalizeRange([], 0, [], 1),
+        cAssertRangeNone
+      ])),
+      Logger.t('Should not normalize into code', Chain.asStep(viewBlock, [
+        cSetHtml('<code>a</code>'),
         cNormalizeRange([], 0, [], 1),
         cAssertRangeNone
       ])),
@@ -293,7 +300,7 @@ UnitTest.asynctest('browser.tinymce.core.selection.NormalizeRangeTest', function
     Logger.t('Normalize on document', Step.sync(function () {
       const doc = document.implementation.createHTMLDocument('');
       const rng = document.createRange();
-      const dom = new DOMUtils(doc, { root_element: doc.body });
+      const dom = DOMUtils(doc, { root_element: doc.body });
 
       doc.body.innerHTML = '<p>a</p>';
 

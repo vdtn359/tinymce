@@ -1,15 +1,13 @@
 /**
- * ListBox.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import MenuButton from './MenuButton';
 import Menu from './Menu';
+import { Arr } from '@ephox/katamari';
 
 /**
  * Creates a new list box control.
@@ -88,6 +86,35 @@ export default MenuButton.extend({
 
       lastItemCtrl = ctrl;
     });
+  },
+
+  // tslint:disable-next-line:object-literal-shorthand
+  value: function (value) {
+    if (arguments.length === 0) {
+      return this.state.get('value');
+    }
+
+    if (typeof value === 'undefined') {
+      return this;
+    }
+
+    function valueExists(values) {
+      return Arr.exists(values, (a) => {
+        return a.menu ? valueExists(a.menu) : a.value === value;
+      });
+    }
+
+    if (this.settings.values) {
+      if (valueExists(this.settings.values)) {
+        this.state.set('value', value);
+      } else if (value === null) {
+        this.state.set('value', null);
+      }
+    } else {
+      this.state.set('value', value);
+    }
+
+    return this;
   },
 
   /**

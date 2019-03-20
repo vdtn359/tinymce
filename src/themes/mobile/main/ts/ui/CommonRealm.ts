@@ -1,8 +1,15 @@
-import { Behaviour, Button, Container, GuiFactory, Replacing, Swapping } from '@ephox/alloy';
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
 
-import UiDomFactory from '../util/UiDomFactory';
+import { Behaviour, Button, Container, GuiFactory, Replacing, Swapping, ComponentApi } from '@ephox/alloy';
 
-const makeEditSwitch = function (webapp) {
+import * as UiDomFactory from '../util/UiDomFactory';
+
+const makeEditSwitch = function (webapp): ComponentApi.AlloyComponent {
   return GuiFactory.build(
     Button.sketch({
       dom: UiDomFactory.dom('<div class="${prefix}-mask-edit-icon ${prefix}-icon"></div>'),

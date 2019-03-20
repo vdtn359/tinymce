@@ -1,10 +1,12 @@
-import { Assertions, GeneralSteps, Logger, Pipeline, Step, Waiter } from '@ephox/agar';
+import { Assertions, GeneralSteps, Logger, Pipeline, Step, Waiter, Cursors } from '@ephox/agar';
 import { Cell } from '@ephox/katamari';
 import { TinyApis, TinyLoader } from '@ephox/mcagar';
 import { Element } from '@ephox/sugar';
 import ScrollIntoView from 'tinymce/core/dom/ScrollIntoView';
 import Theme from 'tinymce/themes/modern/Theme';
 import { UnitTest } from '@ephox/bedrock';
+import { Editor } from 'tinymce/core/api/Editor';
+import { window } from '@ephox/dom-globals';
 
 UnitTest.asynctest('browser.tinymce.core.dom.ScrollIntoViewTest', function () {
   const success = arguments[arguments.length - 2];
@@ -33,9 +35,20 @@ UnitTest.asynctest('browser.tinymce.core.dom.ScrollIntoViewTest', function () {
     });
   };
 
-  const sScrollIntoViewPrivateApi = function (editor, selector, alignToTop) {
+  const sScrollElementIntoView = function (editor, selector, alignToTop) {
     return Step.sync(function () {
-      ScrollIntoView.scrollIntoView(editor, editor.dom.select(selector)[0], alignToTop);
+      ScrollIntoView.scrollElementIntoView(editor, editor.dom.select(selector)[0], alignToTop);
+    });
+  };
+
+  const sScrollRangeIntoView = (editor: Editor, path: number[], offset: number) => {
+    return Step.sync(function () {
+      const x = Cursors.calculateOne(Element.fromDom(editor.getBody()), path);
+      const rng = editor.dom.createRng();
+      rng.setStart(x.dom(), offset);
+      rng.setEnd(x.dom(), offset);
+
+      ScrollIntoView.scrollRangeIntoView(editor, rng);
     });
   };
 
@@ -43,6 +56,15 @@ UnitTest.asynctest('browser.tinymce.core.dom.ScrollIntoViewTest', function () {
     return Step.sync(function () {
       Assertions.assertEq('Scroll position X should be expected value', x, editor.dom.getViewPort(editor.getWin()).x);
       Assertions.assertEq('Scroll position Y should be expected value', y, editor.dom.getViewPort(editor.getWin()).y);
+    });
+  };
+
+  const sAssertApproxScrollPosition = function (editor, x, y) {
+    return Step.sync(function () {
+      const actualX = editor.dom.getViewPort(editor.getWin()).x;
+      const actualY = editor.dom.getViewPort(editor.getWin()).y;
+      Assertions.assertEq(`Scroll position X should be expected value: ${x} got ${actualX}`, true, Math.abs(x - actualX) < 5);
+      Assertions.assertEq(`Scroll position Y should be expected value: ${y} got ${actualY}`, true, Math.abs(y - actualY) < 5);
     });
   };
 
@@ -68,7 +90,7 @@ UnitTest.asynctest('browser.tinymce.core.dom.ScrollIntoViewTest', function () {
   };
 
   const mAssertScrollIntoViewEventInfo = function (editor, expectedElementSelector, expectedAlignToTop) {
-    return Step.stateful(function (value, next, die) {
+    return Step.stateful(function (value: any, next, die) {
       const expectedTarget = Element.fromDom(editor.dom.select(expectedElementSelector)[0]);
       const actualTarget = Element.fromDom(value.state.get().elm);
       Assertions.assertDomEq('Target should be expected element', expectedTarget, actualTarget);
@@ -95,18 +117,30 @@ UnitTest.asynctest('browser.tinymce.core.dom.ScrollIntoViewTest', function () {
           sAssertScrollPosition(editor, 0, 925)
         ]))
       ])),
-      Logger.t('Private ScrollIntoView API', GeneralSteps.sequence([
+      Logger.t('Private ScrollElementIntoView', GeneralSteps.sequence([
         Logger.t('Scroll to element align to bottom', GeneralSteps.sequence([
           sScrollReset(editor),
           sSetContent(editor, tinyApis, '<div style="height: 1000px">a</div><div style="height: 50px">b</div><div style="height: 1000px">a</div>'),
-          sScrollIntoViewPrivateApi(editor, 'div:nth-child(2)', false),
+          sScrollElementIntoView(editor, 'div:nth-child(2)', false),
           sAssertScrollPosition(editor, 0, 975)
         ])),
         Logger.t('Scroll to element align to top', GeneralSteps.sequence([
           sScrollReset(editor),
           sSetContent(editor, tinyApis, '<div style="height: 1000px">a</div><div style="height: 50px">b</div><div style="height: 1000px">a</div>'),
-          sScrollIntoViewPrivateApi(editor, 'div:nth-child(2)', true),
+          sScrollElementIntoView(editor, 'div:nth-child(2)', true),
           sAssertScrollPosition(editor, 0, 925)
+        ]))
+      ])),
+      Logger.t('Private ScrollRangeIntoView', GeneralSteps.sequence([
+        Logger.t('Scroll up/down', GeneralSteps.sequence([
+          sScrollReset(editor),
+          sSetContent(editor, tinyApis, '<div style="height: 1000px">a</div><div style="height: 50px">b</div><div style="height: 1000px">a</div>'),
+          sScrollRangeIntoView(editor, [1, 0], 0),
+          sAssertApproxScrollPosition(editor, 0, 921),
+          sScrollRangeIntoView(editor, [0, 0], 0),
+          sAssertApproxScrollPosition(editor, 0, 0),
+          sScrollRangeIntoView(editor, [2, 0], 0),
+          sAssertApproxScrollPosition(editor, 0, 971)
         ]))
       ])),
       Logger.t('Override scrollIntoView event', GeneralSteps.sequence([
@@ -130,7 +164,7 @@ UnitTest.asynctest('browser.tinymce.core.dom.ScrollIntoViewTest', function () {
           sScrollReset(editor),
           sSetContent(editor, tinyApis, '<div style="height: 1000px">a</div><div style="height: 50px">b</div><div style="height: 1000px">a</div>'),
           mBindScrollIntoViewEvent(editor),
-          sScrollIntoViewPrivateApi(editor, 'div:nth-child(2)', false),
+          sScrollElementIntoView(editor, 'div:nth-child(2)', false),
           mAssertScrollIntoViewEventInfo(editor, 'div:nth-child(2)', false),
           sAssertScrollPosition(editor, 0, 0)
         ])),
@@ -138,7 +172,7 @@ UnitTest.asynctest('browser.tinymce.core.dom.ScrollIntoViewTest', function () {
           sScrollReset(editor),
           sSetContent(editor, tinyApis, '<div style="height: 1000px">a</div><div style="height: 50px">b</div><div style="height: 1000px">a</div>'),
           mBindScrollIntoViewEvent(editor),
-          sScrollIntoViewPrivateApi(editor, 'div:nth-child(2)', true),
+          sScrollElementIntoView(editor, 'div:nth-child(2)', true),
           mAssertScrollIntoViewEventInfo(editor, 'div:nth-child(2)', true),
           sAssertScrollPosition(editor, 0, 0)
         ]))

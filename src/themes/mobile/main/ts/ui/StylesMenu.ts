@@ -1,9 +1,16 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import {
     AddEventsBehaviour, AlloyEvents, Behaviour, Button, GuiFactory, Memento, Menu, Representing,
     TieredMenu, Toggling, Transitioning
 } from '@ephox/alloy';
 import { Objects } from '@ephox/boulder';
-import { Arr, Merger, Obj } from '@ephox/katamari';
+import { Arr, Merger, Obj, Option } from '@ephox/katamari';
 import { Css, SelectorFind, Width } from '@ephox/sugar';
 
 import Receivers from '../channels/Receivers';
@@ -170,8 +177,10 @@ const sketch = function (settings) {
     onExecute (tmenu, item) {
       const v = Representing.getValue(item);
       settings.handle(item, v.value);
+      return Option.none();
     },
     onEscape () {
+      return Option.none();
     },
     onOpenMenu (container, menu) {
       const w = Width.get(container.element());

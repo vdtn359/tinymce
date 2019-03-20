@@ -1,18 +1,25 @@
 /**
- * ImageScanner.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Promise from '../api/util/Promise';
-import Arr from '../util/Arr';
-import Fun from '../util/Fun';
 import Conversions from './Conversions';
 import Env from '../api/Env';
+import { HTMLElement, HTMLImageElement } from '@ephox/dom-globals';
+import { BlobCache, BlobInfo } from 'tinymce/core/api/file/BlobCache';
+import { Fun, Arr } from '@ephox/katamari';
+
+export interface BlobInfoImagePair {
+  image: HTMLImageElement;
+  blobInfo: BlobInfo;
+}
+
+export interface ImageScanner {
+  findAll: (elm: HTMLElement, predicate?: (img: HTMLImageElement) => boolean) => Promise<BlobInfoImagePair[]>;
+}
 
 /**
  * Finds images with data uris or blob uris. If data uris are found it will convert them into blob uris.
@@ -23,11 +30,11 @@ import Env from '../api/Env';
 
 let count = 0;
 
-const uniqueId = function (prefix?) {
+const uniqueId = function (prefix?: string): string {
   return (prefix || 'blobid') + (count++);
 };
 
-const imageToBlobInfo = function (blobCache, img, resolve, reject) {
+const imageToBlobInfo = function (blobCache: BlobCache, img: HTMLImageElement, resolve, reject) {
   let base64, blobInfo;
 
   if (img.src.indexOf('blob:') === 0) {
@@ -83,15 +90,15 @@ const imageToBlobInfo = function (blobCache, img, resolve, reject) {
   }
 };
 
-const getAllImages = function (elm) {
-  return elm ? elm.getElementsByTagName('img') : [];
+const getAllImages = function (elm: HTMLElement): HTMLImageElement[] {
+  return elm ? Arr.from(elm.getElementsByTagName('img')) : [];
 };
 
-export default function (uploadStatus, blobCache) {
+export default function (uploadStatus, blobCache: BlobCache): ImageScanner {
   const cachedPromises = {};
 
-  const findAll = function (elm, predicate?) {
-    let images, promises;
+  const findAll = function (elm: HTMLElement, predicate?: (img: HTMLImageElement) => boolean) {
+    let images;
 
     if (!predicate) {
       predicate = Fun.constant(true);
@@ -117,7 +124,7 @@ export default function (uploadStatus, blobCache) {
       }
 
       if (src.indexOf('blob:') === 0) {
-        return !uploadStatus.isUploaded(src);
+        return !uploadStatus.isUploaded(src) && predicate(img);
       }
 
       if (src.indexOf('data:') === 0) {
@@ -127,9 +134,7 @@ export default function (uploadStatus, blobCache) {
       return false;
     });
 
-    promises = Arr.map(images, function (img) {
-      let newPromise;
-
+    const promises = Arr.map(images, function (img) {
       if (cachedPromises[img.src]) {
         // Since the cached promise will return the cached image
         // We need to wrap it and resolve with the actual image
@@ -146,7 +151,7 @@ export default function (uploadStatus, blobCache) {
         });
       }
 
-      newPromise = new Promise(function (resolve, reject) {
+      const newPromise = new Promise<{image, blobInfo}>(function (resolve, reject) {
         imageToBlobInfo(blobCache, img, resolve, reject);
       }).then(function (result) {
         delete cachedPromises[result.image.src];

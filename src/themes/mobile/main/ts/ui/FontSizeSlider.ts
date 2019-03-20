@@ -1,7 +1,15 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import SizeSlider from './SizeSlider';
-import ToolbarWidgets from './ToolbarWidgets';
+import * as ToolbarWidgets from './ToolbarWidgets';
 import FontSizes from '../util/FontSizes';
-import UiDomFactory from '../util/UiDomFactory';
+import * as UiDomFactory from '../util/UiDomFactory';
+import { SketchSpec } from '@ephox/alloy';
 
 const sizes = FontSizes.candidates();
 
@@ -22,7 +30,7 @@ const makeItems = function (spec) {
   ];
 };
 
-const sketch = function (realm, editor) {
+const sketch = function (realm, editor): SketchSpec {
   const spec = {
     onChange (value) {
       FontSizes.apply(editor, value);
@@ -37,7 +45,7 @@ const sketch = function (realm, editor) {
   });
 };
 
-export default {
+export {
   makeItems,
   sketch
 };

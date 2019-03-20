@@ -1,15 +1,31 @@
-import { Behaviour, Container, GuiFactory, Replacing, Sliding } from '@ephox/alloy';
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
+import { Behaviour, Container, GuiFactory, Replacing, Sliding, ComponentApi } from '@ephox/alloy';
 import { Fun } from '@ephox/katamari';
 
 import Receivers from '../channels/Receivers';
 import Styles from '../style/Styles';
+import { SugarElement } from 'tinymce/themes/mobile/alien/TypeDefinitions';
+import { window } from '@ephox/dom-globals';
 
-const build = function (refresh, scrollIntoView) {
+export interface DropUp {
+  appear: (menu: any, update: any, component: any) => void;
+  disappear: (onReadyToShrink: any) => void;
+  component: () => ComponentApi.AlloyComponent;
+  element: () => SugarElement;
+}
+
+const build = function (refresh, scrollIntoView): DropUp {
   const dropup = GuiFactory.build(
     Container.sketch({
       dom: {
         tag: 'div',
-        classes: Styles.resolve('dropup')
+        classes: [ Styles.resolve('dropup') ]
       },
       components: [
 
@@ -40,7 +56,7 @@ const build = function (refresh, scrollIntoView) {
         })
       ])
     })
-  );
+  ) as ComponentApi.AlloyComponent;
 
   const appear = function (menu, update, component) {
     if (Sliding.hasShrunk(dropup) === true && Sliding.isTransitioning(dropup) === false) {
@@ -67,6 +83,6 @@ const build = function (refresh, scrollIntoView) {
   };
 };
 
-export default {
+export {
   build
 };

@@ -1,11 +1,8 @@
 /**
- * RangeUtils.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun } from '@ephox/katamari';
@@ -15,13 +12,15 @@ import RangeCompare from '../../selection/RangeCompare';
 import * as RangeNodes from '../../selection/RangeNodes';
 import RangeWalk from '../../selection/RangeWalk';
 import SplitRange from '../../selection/SplitRange';
+import { DOMUtils } from 'tinymce/core/api/dom/DOMUtils';
+import { Range, Document, Node } from '@ephox/dom-globals';
 
 /**
  * This class contains a few utility methods for ranges.
  *
  * @class tinymce.dom.RangeUtils
  */
-export function RangeUtils(dom) {
+export function RangeUtils(dom: DOMUtils) {
   /**
    * Walks the specified range like object and executes the callback for each sibling collection it finds.
    *
@@ -90,9 +89,9 @@ export namespace RangeUtils {
    * @param {Document} doc Document that x/y are relative to
    * @returns {Range} caret range
    */
-  export const getCaretRangeFromPoint = CaretRangeFromPoint.fromPoint;
+  export const getCaretRangeFromPoint = CaretRangeFromPoint.fromPoint as (clientX: number, clientY: number, doc: Document) => Range;
 
-  export const getSelectedNode = RangeNodes.getSelectedNode;
+  export const getSelectedNode = RangeNodes.getSelectedNode as (range: Range) => Node;
   export const getNode = RangeNodes.getNode;
 }
 

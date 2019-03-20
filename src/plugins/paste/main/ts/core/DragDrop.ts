@@ -1,11 +1,8 @@
 /**
- * DragDrop.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import RangeUtils from 'tinymce/core/api/dom/RangeUtils';
@@ -15,6 +12,7 @@ import InternalHtml from './InternalHtml';
 import Utils from './Utils';
 import { Editor } from 'tinymce/core/api/Editor';
 import { Clipboard } from '../api/Clipboard';
+import { MouseEvent, DataTransfer, Range } from '@ephox/dom-globals';
 
 const getCaretRangeFromEvent = function (editor: Editor, e: MouseEvent) {
   return RangeUtils.getCaretRangeFromPoint(e.clientX, e.clientY, editor.getDoc());

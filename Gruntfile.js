@@ -56,6 +56,7 @@ module.exports = function (grunt) {
             format: 'iife',
             banner: '(function () {',
             footer: '})();',
+            onwarn: swag.onwarn,
             plugins: [
               swag.nodeResolve({
                 basedir: __dirname,
@@ -82,6 +83,7 @@ module.exports = function (grunt) {
             format: 'iife',
             banner: '(function () {',
             footer: '})();',
+            onwarn: swag.onwarn,
             plugins: [
               swag.nodeResolve({
                 basedir: __dirname,
@@ -89,7 +91,11 @@ module.exports = function (grunt) {
                   'tinymce/core': 'lib/globals/tinymce/core'
                 }, [
                   [`tinymce/plugins/${name}`, `lib/plugins/${name}/main/ts`]
-                ])
+                ]),
+                mappers: [
+                  swag.mappers.replaceDir('./lib/core/main/ts/api', './lib/globals/tinymce/core/api'),
+                  swag.mappers.invalidDir('./lib/core/main/ts')
+                ]
               }),
               swag.remapImports()
             ]
@@ -105,6 +111,7 @@ module.exports = function (grunt) {
             format: 'iife',
             banner: '(function () {',
             footer: '})();',
+            onwarn: swag.onwarn,
             plugins: [
               swag.nodeResolve({
                 basedir: __dirname,
@@ -113,7 +120,11 @@ module.exports = function (grunt) {
                   'tinymce/ui': 'lib/ui/main/ts'
                 }, [
                   [`tinymce/themes/${name}`, `lib/themes/${name}/main/ts`]
-                ])
+                ]),
+                mappers: [
+                  swag.mappers.replaceDir('./lib/core/main/ts/api', './lib/globals/tinymce/core/api'),
+                  swag.mappers.invalidDir('./lib/core/main/ts')
+                ]
               }),
               swag.remapImports()
             ]
@@ -176,7 +187,7 @@ module.exports = function (grunt) {
         webpack: gruntWebPack.all(plugins, themes),
         publicPath: '/',
         inline: false,
-        port: 3000,
+        port: grunt.option('webpack-port') !== undefined ? grunt.option('webpack-port') : 3000,
         host: '0.0.0.0',
         disableHostCheck: true,
         before: app => gruntWebPack.generateDemoIndex(grunt, app, plugins, themes)
@@ -490,6 +501,10 @@ module.exports = function (grunt) {
             zip.addData('package.json', jsonToBuffer({
               'name': 'tinymce',
               'version': packageData.version,
+              'repository': {
+                'type': 'git',
+                'url': 'https://github.com/tinymce/tinymce-dist.git'
+              },
               'description': 'Web based JavaScript HTML WYSIWYG editor control.',
               'author': 'Ephox Corporation',
               'main': 'tinymce.js',
@@ -720,6 +735,16 @@ module.exports = function (grunt) {
         singleTimeout: 300000,
         customRoutes: 'src/core/test/json/routes.json',
         name: 'chrome-headless'
+      },
+      'firefox-headless': {
+        browser: 'firefox-headless',
+        config: 'tsconfig.json',
+        testfiles: ['src/**/test/ts/**/*Test.ts'],
+        stopOnFailure: true,
+        overallTimeout: 600000,
+        singleTimeout: 300000,
+        customRoutes: 'src/core/test/json/routes.json',
+        name: 'firefox-headless'
       },
       chrome: {
         browser: 'chrome',

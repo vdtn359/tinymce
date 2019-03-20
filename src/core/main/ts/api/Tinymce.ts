@@ -1,14 +1,12 @@
 /**
- * Tinymce.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import AddOnManager from './AddOnManager';
+import { AddOnManager } from './AddOnManager';
+import Annotator from './Annotator';
 import { Editor } from './Editor';
 import EditorCommands from './EditorCommands';
 import EditorManager from './EditorManager';
@@ -38,7 +36,7 @@ import Node from './html/Node';
 import SaxParser from './html/SaxParser';
 import Schema from './html/Schema';
 import HtmlSerializer from './html/Serializer';
-import Styles from './html/Styles';
+import { Styles } from './html/Styles';
 import Writer from './html/Writer';
 import Factory from './ui/Factory';
 import Class from './util/Class';
@@ -60,7 +58,7 @@ import XHR from './util/XHR';
 let tinymce = EditorManager;
 
 /**
- * @include ../../../../../../tools/docs/tinymce.js
+ * @include ../../../../../tools/docs/tinymce.js
  */
 const publicApi = {
   geom: {
@@ -117,6 +115,7 @@ const publicApi = {
 
   Env,
   AddOnManager,
+  Annotator,
   Formatter,
   UndoManager,
   EditorCommands,

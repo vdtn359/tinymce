@@ -1,11 +1,8 @@
 /**
- * DataToHtml.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Tools from 'tinymce/core/api/util/Tools';
@@ -13,7 +10,7 @@ import Settings from '../api/Settings';
 import HtmlToData from './HtmlToData';
 import Mime from './Mime';
 import UpdateHtml from './UpdateHtml';
-import UrlPatterns from './UrlPatterns';
+import * as UrlPatterns from './UrlPatterns';
 import VideoScript from './VideoScript';
 
 const getIframeHtml = function (data) {
@@ -94,30 +91,15 @@ const dataToHtml = function (editor, dataIn) {
   data.source2mime = Mime.guess(data.source2);
   data.poster = editor.convertURL(data.poster, 'poster');
 
-  Tools.each(UrlPatterns.urlPatterns, function (pattern) {
-    let i;
-    let url;
+  const pattern = UrlPatterns.matchPattern(data.source1);
 
-    const match = pattern.regex.exec(data.source1);
-
-    if (match) {
-      url = pattern.url;
-
-      for (i = 0; match[i]; i++) {
-        /*jshint loopfunc:true*/
-        /*eslint no-loop-func:0 */
-        url = url.replace('$' + i, function () {
-          return match[i];
-        });
-      }
-
-      data.source1 = url;
-      data.type = pattern.type;
-      data.allowFullscreen = pattern.allowFullscreen;
-      data.width = data.width || pattern.w;
-      data.height = data.height || pattern.h;
-    }
-  });
+  if (pattern) {
+    data.source1 = pattern.url;
+    data.type = pattern.type;
+    data.allowFullscreen = pattern.allowFullscreen;
+    data.width = data.width || pattern.w;
+    data.height = data.height || pattern.h;
+  }
 
   if (data.embed) {
     return UpdateHtml.updateHtml(data.embed, data, true);

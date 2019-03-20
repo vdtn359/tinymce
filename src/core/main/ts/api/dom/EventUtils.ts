@@ -1,19 +1,19 @@
 /**
- * EventUtils.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Env from '../Env';
 import Delay from '../util/Delay';
+import { document, window } from '@ephox/dom-globals';
 
-/*jshint loopfunc:true*/
-
-/*eslint no-loop-func:0 */
+export type EditorEvent<T> = T & {
+  isDefaultPrevented: () => boolean;
+  isPropagationStopped: () => boolean;
+  isImmediatePropagationStopped: () => boolean;
+};
 
 /**
  * This class wraps the browsers native event logic with more convenient methods.
@@ -69,26 +69,16 @@ const removeEvent = function (target, name, callback, capture?) {
  * Gets the event target based on shadow dom properties like path and composedPath.
  */
 const getTargetFromShadowDom = function (event, defaultTarget) {
-  let path, target = defaultTarget;
-
-  // When target element is inside Shadow DOM we need to take first element from path
+  // When target element is inside Shadow DOM we need to take first element from composedPath
   // otherwise we'll get Shadow Root parent, not actual target element
-
-  // Normalize target for WebComponents v0 implementation (in Chrome)
-  path = event.path;
-  if (path && path.length > 0) {
-    target = path[0];
-  }
-
-  // Normalize target for WebComponents v1 implementation (standard)
   if (event.composedPath) {
-    path = event.composedPath();
-    if (path && path.length > 0) {
-      target = path[0];
+    const composedPath = event.composedPath();
+    if (composedPath && composedPath.length > 0) {
+      return composedPath[0];
     }
   }
 
-  return target;
+  return defaultTarget;
 };
 
 /**

@@ -1,11 +1,8 @@
 /**
- * CaretContainerRemove.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr } from '@ephox/katamari';
@@ -13,6 +10,7 @@ import * as CaretContainer from './CaretContainer';
 import CaretPosition from './CaretPosition';
 import NodeType from '../dom/NodeType';
 import Zwsp from '../text/Zwsp';
+import { Node, Text } from '@ephox/dom-globals';
 
 const isElement = NodeType.isElement;
 const isText = NodeType.isText;
@@ -66,7 +64,7 @@ const removeTextAndReposition = (caretContainer: Text, pos: CaretPosition): Care
 
 const removeElementAndReposition = (caretContainer: Node, pos: CaretPosition): CaretPosition => {
   const parentNode = pos.container();
-  const newPosition = Arr.indexOf(parentNode.childNodes, caretContainer).map(function (index) {
+  const newPosition = Arr.indexOf(Arr.from(parentNode.childNodes), caretContainer).map(function (index) {
     return index < pos.offset() ? CaretPosition(parentNode, pos.offset() - 1) : pos;
   }).getOr(pos);
   remove(caretContainer);

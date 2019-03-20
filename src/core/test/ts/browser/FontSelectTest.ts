@@ -4,6 +4,7 @@ import { TinyApis, TinyLoader } from '@ephox/mcagar';
 import { Element, TextContent } from '@ephox/sugar';
 import Theme from 'tinymce/themes/modern/Theme';
 import { UnitTest } from '@ephox/bedrock';
+import { document } from '@ephox/dom-globals';
 
 UnitTest.asynctest('browser.tinymce.core.FontSelectTest', function () {
   const success = arguments[arguments.length - 2];
@@ -24,8 +25,8 @@ UnitTest.asynctest('browser.tinymce.core.FontSelectTest', function () {
 
     Pipeline.async({}, [
       Logger.t('Font family and font size on initial page load', GeneralSteps.sequence([
-        sAssertSelectBoxDisplayValue(editor, 'Font Sizes', '32pt'),
-        sAssertSelectBoxDisplayValue(editor, 'Font Family', 'Helvetica')
+        sAssertSelectBoxDisplayValue(editor, 'Font Sizes', '24pt'),
+        sAssertSelectBoxDisplayValue(editor, 'Font Family', 'Arial')
       ])),
 
       Logger.t('Font family and font size on paragraph', GeneralSteps.sequence([

@@ -1,26 +1,26 @@
 /**
- * Api.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Settings from './Settings';
-import Actions from '../core/Actions';
+import Actions, { LastSuggestion } from '../core/Actions';
+import { Editor } from 'tinymce/core/api/Editor';
+import { Cell } from '@ephox/katamari';
+import { DomTextMatcher } from 'tinymce/plugins/spellchecker/core/DomTextMatcher';
 
-const get = function (editor, startedState, lastSuggestionsState, textMatcherState, url) {
+const get = function (editor: Editor, startedState: Cell<boolean>, lastSuggestionsState: Cell<LastSuggestion>, textMatcherState: Cell<DomTextMatcher>, currentLanguageState: Cell<string>, url: string) {
   const getLanguage = function () {
-    return Settings.getLanguage(editor);
+    return currentLanguageState.get();
   };
 
   const getWordCharPattern = function () {
     return Settings.getSpellcheckerWordcharPattern(editor);
   };
 
-  const markErrors = function (data) {
+  const markErrors = function (data: string) {
     Actions.markErrors(editor, startedState, textMatcherState, lastSuggestionsState, data);
   };
 

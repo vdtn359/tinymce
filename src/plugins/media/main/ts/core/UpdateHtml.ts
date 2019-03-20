@@ -1,11 +1,8 @@
 /**
- * UpdateHtml.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Writer from 'tinymce/core/api/html/Writer';
@@ -13,6 +10,7 @@ import SaxParser from 'tinymce/core/api/html/SaxParser';
 import Schema from 'tinymce/core/api/html/Schema';
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
 import Size from './Size';
+import { Element } from '@ephox/dom-globals';
 
 const DOM = DOMUtils.DOM;
 
@@ -191,7 +189,7 @@ const isEphoxEmbed = function (html) {
 
 const updateEphoxEmbed = function (html, data) {
   const fragment = DOM.createFragment(html);
-  const div = fragment.firstChild;
+  const div = fragment.firstChild as Element;
 
   Size.setMaxWidth(div, data.width);
   Size.setMaxHeight(div, data.height);

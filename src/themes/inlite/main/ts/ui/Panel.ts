@@ -1,11 +1,8 @@
 /**
- * Panel.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
@@ -18,12 +15,24 @@ import Layout from '../core/Layout';
 import Measure from '../core/Measure';
 import Forms from './Forms';
 import Toolbar from './Toolbar';
+import { Editor } from 'tinymce/core/api/Editor';
+import { ContextToolbar } from 'tinymce/themes/inlite/core/Render';
 
-export default function () {
+export interface InlitePanel {
+  show: (editor: Editor, id: string, targetRect, toolbars: ContextToolbar[]) => void;
+  showForm: (editor: Editor, id: string) => void;
+  reposition: (editor: Editor, id: string, targetRect) => void;
+  inForm: () => boolean;
+  hide: () => void;
+  focus: () => void;
+  remove: () => void;
+}
+
+export const create = (): InlitePanel => {
   let panel, currentRect;
 
-  const createToolbars = function (editor, toolbars) {
-    return Tools.map(toolbars, function (toolbar) {
+  const createToolbars = function (editor: Editor, toolbars: ContextToolbar[]) {
+    return Tools.map(toolbars, function (toolbar: ContextToolbar) {
       return Toolbar.create(editor, toolbar.id, toolbar.items);
     });
   };
@@ -32,7 +41,7 @@ export default function () {
     return toolbar.items().length > 0;
   };
 
-  const create = function (editor, toolbars) {
+  const create = function (editor: Editor, toolbars: ContextToolbar[]) {
     const items = createToolbars(editor, toolbars).concat([
       Toolbar.create(editor, 'text', Settings.getTextSelectionToolbarItems(editor)),
       Toolbar.create(editor, 'insert', Settings.getInsertToolbarItems(editor)),
@@ -83,7 +92,7 @@ export default function () {
       panel.classes.toggle('arrow-left', true);
       panel.classes.toggle('arrow-right', false);
     } else if (relPos === 'cl') {
-      panel.classes.toggle('arrow-left', true);
+      panel.classes.toggle('arrow-left', false);
       panel.classes.toggle('arrow-right', true);
     } else {
       Tools.each({
@@ -150,7 +159,7 @@ export default function () {
     return panel.items().filter('form:visible').length > 0;
   };
 
-  const showForm = function (editor, id) {
+  const showForm = function (editor: Editor, id) {
     if (panel) {
       panel.items().hide();
 
@@ -179,7 +188,7 @@ export default function () {
     }
   };
 
-  const show = function (editor, id, targetRect, toolbars) {
+  const show = function (editor: Editor, id: string, targetRect, toolbars) {
     if (!panel) {
       Events.fireBeforeRenderUI(editor);
       panel = create(editor, toolbars);
@@ -190,7 +199,7 @@ export default function () {
     showPanelAt(panel, id, editor, targetRect);
   };
 
-  const reposition = function (editor, id, targetRect) {
+  const reposition = function (editor: Editor, id: string, targetRect) {
     if (panel) {
       repositionPanelAt(panel, id, editor, targetRect);
     }
@@ -230,4 +239,4 @@ export default function () {
     focus,
     remove
   };
-}
+};

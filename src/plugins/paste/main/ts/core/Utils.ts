@@ -1,16 +1,14 @@
 /**
- * Utils.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DomParser from 'tinymce/core/api/html/DomParser';
 import Schema from 'tinymce/core/api/html/Schema';
 import Tools from 'tinymce/core/api/util/Tools';
+import { navigator } from '@ephox/dom-globals';
 
 /**
  * This class contails various utility functions for the paste plugin.
@@ -53,12 +51,17 @@ function innerText(html: string) {
       return;
     }
 
-    // img/input/hr
+    // Ignore wbr, to replicate innerText on Chrome/Firefox
+    if (name === 'wbr') {
+      return;
+    }
+
+    // img/input/hr but ignore wbr as it's just a potential word break
     if (shortEndedElements[name]) {
       text += ' ';
     }
 
-    // Ingore script, video contents
+    // Ignore script, video contents
     if (ignoreElements[name]) {
       text += ' ';
       return;

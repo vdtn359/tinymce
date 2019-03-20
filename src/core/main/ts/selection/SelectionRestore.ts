@@ -1,17 +1,15 @@
 /**
- * SelectionRestore.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Throttler } from '@ephox/katamari';
 import { PlatformDetection } from '@ephox/sand';
 import DOMUtils from '../api/dom/DOMUtils';
 import SelectionBookmark from './SelectionBookmark';
+import { document } from '@ephox/dom-globals';
 
 const isManualNodeChange = function (e) {
   return e.type === 'nodechange' && e.selectionChange;
@@ -44,7 +42,7 @@ const registerMouseUp = function (editor, throttledStore) {
 const registerEditorEvents = function (editor, throttledStore) {
   const browser = PlatformDetection.detect().browser;
 
-  if (browser.isIE() || browser.isEdge()) {
+  if (browser.isIE()) {
     registerFocusOut(editor);
   } else {
     registerMouseUp(editor, throttledStore);

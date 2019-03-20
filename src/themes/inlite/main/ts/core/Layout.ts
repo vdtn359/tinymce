@@ -1,14 +1,11 @@
 /**
- * Layout.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import Rect from 'tinymce/core/api/geom/Rect';
+import Rect, { GeomRect } from 'tinymce/core/api/geom/Rect';
 import Convert from './Convert';
 
 const result = function (rect, position) {
@@ -18,11 +15,11 @@ const result = function (rect, position) {
   };
 };
 
-const moveTo = function (rect, toRect) {
+const moveTo = function (rect: GeomRect, toRect: GeomRect) {
   return { x: toRect.x, y: toRect.y, w: rect.w, h: rect.h };
 };
 
-const calcByPositions = function (testPositions1, testPositions2, targetRect, contentAreaRect, panelRect) {
+const calcByPositions = function (testPositions1: string[], testPositions2: string[], targetRect: GeomRect, contentAreaRect: GeomRect, panelRect: GeomRect) {
   let relPos, relRect, outputPanelRect;
 
   const paddedContentRect = {
@@ -58,7 +55,7 @@ const calcByPositions = function (testPositions1, testPositions2, targetRect, co
   return null;
 };
 
-const calcInsert = function (targetRect, contentAreaRect, panelRect) {
+const calcInsert = function (targetRect: GeomRect, contentAreaRect: GeomRect, panelRect: GeomRect) {
   return calcByPositions(
     ['cr-cl', 'cl-cr'],
     ['bc-tc', 'bl-tl', 'br-tr'],
@@ -68,7 +65,7 @@ const calcInsert = function (targetRect, contentAreaRect, panelRect) {
   );
 };
 
-const calc = function (targetRect, contentAreaRect, panelRect) {
+const calc = function (targetRect: GeomRect, contentAreaRect: GeomRect, panelRect: GeomRect) {
   return calcByPositions(
     ['tc-bc', 'bc-tc', 'tl-bl', 'bl-tl', 'tr-br', 'br-tr', 'cr-cl', 'cl-cr'],
     ['bc-tc', 'bl-tl', 'br-tr', 'cr-cl'],
@@ -78,7 +75,7 @@ const calc = function (targetRect, contentAreaRect, panelRect) {
   );
 };
 
-const userConstrain = function (handler, targetRect, contentAreaRect, panelRect) {
+const userConstrain = function (handler, targetRect: GeomRect, contentAreaRect: GeomRect, panelRect: GeomRect) {
   let userConstrainedPanelRect;
 
   if (typeof handler === 'function') {

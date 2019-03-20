@@ -1,11 +1,8 @@
 /**
- * Forms.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Tools from 'tinymce/core/api/util/Tools';
@@ -13,6 +10,7 @@ import Factory from 'tinymce/core/api/ui/Factory';
 import Promise from 'tinymce/core/api/util/Promise';
 import Actions from '../core/Actions';
 import UrlType from '../core/UrlType';
+import { Editor } from 'tinymce/core/api/Editor';
 
 const focusFirstTextBox = function (form) {
   form.find('textbox').eq(0).each(function (ctrl) {
@@ -20,7 +18,7 @@ const focusFirstTextBox = function (form) {
   });
 };
 
-const createForm = function (name, spec) {
+const createForm = function (name: string, spec: Record<string, any>) {
   const form = Factory.create(
     Tools.extend({
       type: 'form',
@@ -39,12 +37,12 @@ const createForm = function (name, spec) {
   return form;
 };
 
-const toggleVisibility = function (ctrl, state) {
+const toggleVisibility = function (ctrl, state: boolean) {
   return state ? ctrl.show() : ctrl.hide();
 };
 
-const askAboutPrefix = function (editor, href) {
-  return new Promise(function (resolve) {
+const askAboutPrefix = function (editor: Editor, href: string) {
+  return new Promise<string>(function (resolve) {
     editor.windowManager.confirm(
       'The URL you entered seems to be an external link. Do you want to add the required http:// prefix?',
       function (result) {
@@ -55,11 +53,11 @@ const askAboutPrefix = function (editor, href) {
   });
 };
 
-const convertLinkToAbsolute = function (editor, href) {
+const convertLinkToAbsolute = function (editor: Editor, href: string) {
   return !UrlType.isAbsolute(href) && UrlType.isDomainLike(href) ? askAboutPrefix(editor, href) : Promise.resolve(href);
 };
 
-const createQuickLinkForm = function (editor, hide) {
+const createQuickLinkForm = function (editor: Editor, hide: Function) {
   let attachState: any = {};
 
   const unlink = function () {

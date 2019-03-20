@@ -1,31 +1,28 @@
 /**
- * FontSelect.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Tools from 'tinymce/core/api/util/Tools';
-import FontInfo from '../fmt/FontInfo';
 
 const getFirstFont = function (fontFamily) {
   return fontFamily ? fontFamily.split(',')[0] : '';
 };
 
 const findMatchingValue = function (items, fontFamily) {
+  const font = fontFamily ? fontFamily.toLowerCase() : '';
   let value;
 
   Tools.each(items, function (item) {
-    if (item.value.toLowerCase() === fontFamily.toLowerCase()) {
+    if (item.value.toLowerCase() === font) {
       value = item.value;
     }
   });
 
   Tools.each(items, function (item) {
-    if (!value && getFirstFont(item.value).toLowerCase() === getFirstFont(fontFamily).toLowerCase()) {
+    if (!value && getFirstFont(item.value).toLowerCase() === getFirstFont(font).toLowerCase()) {
       value = item.value;
     }
   });
@@ -37,8 +34,12 @@ const createFontNameListBoxChangeHandler = function (editor, items) {
   return function () {
     const self = this;
 
+    // We need to remove the initial value since since the display text will
+    // not be updated if we set it to the same initial value on post render.
+    self.state.set('value', null);
+
     editor.on('init nodeChange', function (e) {
-      const fontFamily = FontInfo.getFontFamily(editor.getBody(), e.element);
+      const fontFamily = editor.queryCommandValue('FontName');
       const match = findMatchingValue(items, fontFamily);
 
       self.value(match ? match : null);

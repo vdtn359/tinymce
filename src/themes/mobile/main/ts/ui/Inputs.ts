@@ -1,11 +1,32 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import {
-    AddEventsBehaviour, AlloyEvents, AlloyTriggers, Behaviour, Button, Composing, Container,
-    DataField, Input, Keying, Memento, NativeEvents, Representing, Tabstopping, Toggling
+  AddEventsBehaviour,
+  AlloyEvents,
+  AlloyTriggers,
+  Behaviour,
+  Button,
+  Composing,
+  Container,
+  DataField,
+  Input,
+  Keying,
+  Memento,
+  NativeEvents,
+  Representing,
+  Tabstopping,
+  Toggling,
+  SketchSpec,
 } from '@ephox/alloy';
 import { Option } from '@ephox/katamari';
 
 import Styles from '../style/Styles';
-import UiDomFactory from '../util/UiDomFactory';
+import * as UiDomFactory from '../util/UiDomFactory';
 
 const clearInputBehaviour = 'input-clearing';
 
@@ -83,11 +104,11 @@ const hidden = function (name) {
       getInitialValue () {
         return Option.none();
       }
-    })
+    }) as SketchSpec
   };
 };
 
-export default {
+export {
   field,
   hidden
 };

@@ -1,11 +1,8 @@
 /**
- * Clipboard.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr, Fun, Option } from '@ephox/katamari';
@@ -15,6 +12,9 @@ import { Element, Elements, Node, Replication } from '@ephox/sugar';
 import TableTargets from '../queries/TableTargets';
 import Ephemera from '../selection/Ephemera';
 import SelectionTypes from '../selection/SelectionTypes';
+import { Editor } from 'tinymce/core/api/Editor';
+import { TableActions } from 'tinymce/plugins/table/actions/TableActions';
+import { Selections } from 'tinymce/plugins/table/selection/Selections';
 
 const extractSelected = function (cells) {
   // Assume for now that we only have one table (also handles the case where we multi select outside a table)
@@ -23,18 +23,20 @@ const extractSelected = function (cells) {
   });
 };
 
-const serializeElement = function (editor, elm) {
-  return editor.selection.serializer.serialize(elm.dom(), {});
+const serializeElements = (editor: Editor, elements: Element[]): string => {
+  return Arr.map(elements, (elm) => editor.selection.serializer.serialize(elm.dom(), {})).join('');
 };
 
-const registerEvents = function (editor, selections, actions, cellSelection) {
+const getTextContent = (elements: Element[]): string => {
+  return Arr.map(elements, (element) => element.dom().innerText).join('');
+};
+
+const registerEvents = function (editor: Editor, selections: Selections, actions: TableActions, cellSelection) {
   editor.on('BeforeGetContent', function (e) {
     const multiCellContext = function (cells) {
       e.preventDefault();
       extractSelected(cells).each(function (elements) {
-        e.content = Arr.map(elements, function (elm) {
-          return serializeElement(editor, elm);
-        }).join('');
+        e.content = e.format === 'text' ? getTextContent(elements) : serializeElements(editor, elements);
       });
     };
 
