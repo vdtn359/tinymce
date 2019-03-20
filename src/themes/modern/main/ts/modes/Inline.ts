@@ -121,7 +121,6 @@ const render = function (editor, theme, args) {
     editor.on('nodeChange', reposition);
     editor.on('ResizeWindow', reposition);
     editor.on('activate', show);
-    editor.on('deactivate', hide);
 
     editor.nodeChanged();
   };
@@ -138,7 +137,7 @@ const render = function (editor, theme, args) {
     }
   });
 
-  editor.on(autoHide ? 'blur hide' : 'hide', hide);
+  editor.on(autoHide ? 'blur hide deactivate' : 'hide', hide);
 
   // Remove the panel when the editor is removed
   editor.on('remove', function () {
