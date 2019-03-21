@@ -96,6 +96,7 @@ const registerCommands = function (editor: Editor, actions: TableActions, cellSe
       });
       const cell = getSelectionStartCell();
       const table = getTableFromCell(cell);
+      // @ts-ignore
       table.bind(function (table) {
         const doc = Element.fromDom(editor.getDoc());
         const generators = TableFill.paste(doc);
