@@ -1,11 +1,8 @@
 /**
- * TableDialog.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun } from '@ephox/katamari';
@@ -13,12 +10,15 @@ import Env from 'tinymce/core/api/Env';
 import Tools from 'tinymce/core/api/util/Tools';
 import InsertTable from '../actions/InsertTable';
 import Styles from '../actions/Styles';
-import Util from '../alien/Util';
+import * as Util from '../alien/Util';
 import Helpers from './Helpers';
 import { hasAdvancedTableTab, hasAppearanceOptions, shouldStyleWithCss, getTableClassList } from '../api/Settings';
+import { DOMUtils } from 'tinymce/core/api/dom/DOMUtils';
+import { StyleMap } from 'tinymce/core/api/html/Styles';
+import { Element } from '@ephox/dom-globals';
 
 // Explore the layers of the table till we find the first layer of tds or ths
-function styleTDTH(dom, elm, name, value?) {
+function styleTDTH(dom: DOMUtils, elm: Element, name: string | StyleMap, value?: string | StyleMap) {
   if (elm.tagName === 'TD' || elm.tagName === 'TH') {
     dom.setStyle(elm, name, value);
   } else {
@@ -118,7 +118,9 @@ const onSubmitTableForm = function (editor, tableElm, evt) {
   let captionElm;
   let data;
 
-  Helpers.updateStyleField(editor, evt);
+  if (hasAdvancedTableTab(editor)) {
+    Helpers.syncAdvancedStyleFields(editor, evt);
+  }
   data = evt.control.rootControl.toJSON();
 
   if (data.class === false) {

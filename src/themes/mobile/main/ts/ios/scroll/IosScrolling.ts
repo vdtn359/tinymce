@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { Fun, Future } from '@ephox/katamari';
 import { Attr, Css, Traverse } from '@ephox/sugar';
 
@@ -15,7 +22,7 @@ const ANIMATION_RATE = 10;
 const lastScroll = 'data-' + Styles.resolve('last-scroll-top');
 
 const getTop = function (element) {
-  const raw = Css.getRaw(element, 'top').getOr(0);
+  const raw = Css.getRaw(element, 'top').getOr('0');
   return parseInt(raw, 10);
 };
 

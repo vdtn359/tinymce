@@ -1,14 +1,12 @@
 /**
- * Env.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { URL } from '@ephox/sand';
+import { navigator, window, matchMedia, document } from '@ephox/dom-globals';
 
 /**
  * This class contains various environment constants like browser versions etc.
@@ -173,7 +171,7 @@ export default {
    */
   ceFalse: (ie === false || ie > 8),
 
-  cacheSuffix: '',
+  cacheSuffix: null,
   container: null,
   overrideViewPort: null,
   experimentalShadowDom: false,

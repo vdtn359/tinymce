@@ -1,9 +1,16 @@
-import { Behaviour, Button, Toggling, Unselecting } from '@ephox/alloy';
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
+import { Behaviour, Button, Toggling, Unselecting, SketchSpec } from '@ephox/alloy';
 import { Merger } from '@ephox/katamari';
 
 import Receivers from '../channels/Receivers';
 import Styles from '../style/Styles';
-import UiDomFactory from '../util/UiDomFactory';
+import * as UiDomFactory from '../util/UiDomFactory';
 
 const forToolbarCommand = function (editor, command) {
   return forToolbar(command, function () {
@@ -41,7 +48,7 @@ const forToolbarStateAction = function (editor, clazz, command, action) {
   return forToolbar(clazz, action, extraBehaviours);
 };
 
-const forToolbar = function (clazz, action, extraBehaviours) {
+const forToolbar = function (clazz, action, extraBehaviours): SketchSpec {
   return Button.sketch({
     dom: UiDomFactory.dom('<span class="${prefix}-toolbar-button ${prefix}-icon-' + clazz + ' ${prefix}-icon"></span>'),
     action,

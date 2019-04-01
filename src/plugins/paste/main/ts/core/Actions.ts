@@ -1,11 +1,8 @@
 /**
- * Actions.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Events from '../api/Events';
@@ -25,11 +22,11 @@ const displayNotification = function (editor: Editor, message: string) {
 };
 
 const togglePlainTextPaste = function (editor: Editor, clipboard: Clipboard, userIsInformedState) {
-  if (clipboard.pasteFormat === 'text') {
-    clipboard.pasteFormat = 'html';
+  if (clipboard.pasteFormat.get() === 'text') {
+    clipboard.pasteFormat.set('html');
     Events.firePastePlainTextToggle(editor, false);
   } else {
-    clipboard.pasteFormat = 'text';
+    clipboard.pasteFormat.set('text');
     Events.firePastePlainTextToggle(editor, true);
 
     if (shouldInformUserAboutPlainText(editor, userIsInformedState)) {

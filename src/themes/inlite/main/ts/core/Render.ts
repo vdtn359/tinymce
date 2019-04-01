@@ -1,30 +1,36 @@
 /**
- * Render.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Env from 'tinymce/core/api/Env';
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
 import Delay from 'tinymce/core/api/util/Delay';
-import Arr from '../alien/Arr';
+import DeepFlatten from '../alien/DeepFlatten';
 import ElementMatcher from './ElementMatcher';
 import Matcher from './Matcher';
 import PredicateId from './PredicateId';
 import SelectionMatcher from './SelectionMatcher';
 import SkinLoader from './SkinLoader';
+import { Editor } from 'tinymce/core/api/Editor';
+import { InlitePanel } from 'tinymce/themes/inlite/ui/Panel';
+import { document } from '@ephox/dom-globals';
 
-const getSelectionElements = function (editor) {
+const getSelectionElements = function (editor: Editor) {
   const node = editor.selection.getNode();
-  const elms = editor.dom.getParents(node);
+  const elms = editor.dom.getParents(node, '*');
   return elms;
 };
 
-const createToolbar = function (editor, selector, id, items) {
+export interface ContextToolbar {
+  predicate: (elm) => boolean;
+  id: string;
+  items: string | string[];
+}
+
+const createToolbar = function (editor: Editor, selector: string, id: string, items: string | string[]): ContextToolbar {
   const selectorPredicate = function (elm) {
     return editor.dom.is(elm, selector);
   };
@@ -36,16 +42,16 @@ const createToolbar = function (editor, selector, id, items) {
   };
 };
 
-const getToolbars = function (editor) {
+const getToolbars = function (editor: Editor): ContextToolbar[] {
   const contextToolbars = editor.contextToolbars;
 
-  return Arr.flatten([
+  return DeepFlatten.flatten([
     contextToolbars ? contextToolbars : [],
     createToolbar(editor, 'img', 'image', 'alignleft aligncenter alignright')
   ]);
 };
 
-const findMatchResult = function (editor, toolbars) {
+const findMatchResult = function (editor: Editor, toolbars: ContextToolbar[]) {
   let result, elements, contextToolbarsPredicateIds;
 
   elements = getSelectionElements(editor);
@@ -61,7 +67,9 @@ const findMatchResult = function (editor, toolbars) {
   return result && result.rect ? result : null;
 };
 
-const togglePanel = function (editor, panel) {
+const editorHasFocus = (editor: Editor) => document.activeElement === editor.getBody();
+
+const togglePanel = function (editor: Editor, panel: InlitePanel) {
   const toggle = function () {
     const toolbars = getToolbars(editor);
     const result = findMatchResult(editor, toolbars);
@@ -74,13 +82,13 @@ const togglePanel = function (editor, panel) {
   };
 
   return function () {
-    if (!editor.removed) {
+    if (!editor.removed && editorHasFocus(editor)) {
       toggle();
     }
   };
 };
 
-const repositionPanel = function (editor, panel) {
+const repositionPanel = function (editor: Editor, panel: InlitePanel) {
   return function () {
     const toolbars = getToolbars(editor);
     const result = findMatchResult(editor, toolbars);
@@ -91,7 +99,7 @@ const repositionPanel = function (editor, panel) {
   };
 };
 
-const ignoreWhenFormIsVisible = function (editor, panel, f) {
+const ignoreWhenFormIsVisible = function (editor: Editor, panel: InlitePanel, f: () => void) {
   return function () {
     if (!editor.removed && !panel.inForm()) {
       f();
@@ -99,7 +107,7 @@ const ignoreWhenFormIsVisible = function (editor, panel, f) {
   };
 };
 
-const bindContextualToolbarsEvents = function (editor, panel) {
+const bindContextualToolbarsEvents = function (editor: Editor, panel: InlitePanel) {
   const throttledTogglePanel = Delay.throttle(togglePanel(editor, panel), 0);
   const throttledTogglePanelWhenNotInForm = Delay.throttle(ignoreWhenFormIsVisible(editor, panel, togglePanel(editor, panel)), 0);
   const reposition = repositionPanel(editor, panel);
@@ -119,7 +127,7 @@ const bindContextualToolbarsEvents = function (editor, panel) {
   editor.shortcuts.add('Alt+F10,F10', '', panel.focus);
 };
 
-const overrideLinkShortcut = function (editor, panel) {
+const overrideLinkShortcut = function (editor: Editor, panel: InlitePanel) {
   editor.shortcuts.remove('meta+k');
   editor.shortcuts.add('meta+k', '', function () {
     const toolbars = getToolbars(editor);
@@ -133,7 +141,7 @@ const overrideLinkShortcut = function (editor, panel) {
   });
 };
 
-const renderInlineUI = function (editor, panel) {
+const renderInlineUI = function (editor: Editor, panel: InlitePanel) {
   SkinLoader.load(editor, function () {
     bindContextualToolbarsEvents(editor, panel);
     overrideLinkShortcut(editor, panel);
@@ -142,11 +150,11 @@ const renderInlineUI = function (editor, panel) {
   return {};
 };
 
-const fail = function (message) {
+const fail = function (message: string) {
   throw new Error(message);
 };
 
-const renderUI = function (editor, panel) {
+const renderUI = function (editor: Editor, panel: InlitePanel) {
   return editor.inline ? renderInlineUI(editor, panel) : fail('inlite theme only supports inline mode.');
 };
 

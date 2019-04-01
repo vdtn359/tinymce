@@ -7,6 +7,7 @@ import Env from 'tinymce/core/api/Env';
 import ViewBlock from '../../module/test/ViewBlock';
 import Zwsp from 'tinymce/core/text/Zwsp';
 import { UnitTest } from '@ephox/bedrock';
+import { document, Text, HTMLElement } from '@ephox/dom-globals';
 
 UnitTest.asynctest('browser.tinymce.core.CaretContainerTest', function () {
   const success = arguments[arguments.length - 2];
@@ -151,9 +152,22 @@ UnitTest.asynctest('browser.tinymce.core.CaretContainerTest', function () {
     LegacyUnit.equal(CaretContainer.isBeforeInline(CaretPosition(getRoot().firstChild, 0)), true);
     LegacyUnit.equal(CaretContainer.isBeforeInline(CaretPosition(getRoot().firstChild, 1)), false);
   });
+  suite.test('isBeforeInline 2', function () {
+    setupHtml('a');
+    viewBlock.get().insertBefore(document.createTextNode(Zwsp.ZWSP), viewBlock.get().firstChild);
+    LegacyUnit.equal(CaretContainer.isBeforeInline(CaretPosition(getRoot().firstChild, 0)), true);
+    LegacyUnit.equal(CaretContainer.isBeforeInline(CaretPosition(getRoot().firstChild, 1)), false);
+  });
 
   suite.test('isAfterInline', function () {
     setupHtml(Zwsp.ZWSP + 'a');
+    LegacyUnit.equal(CaretContainer.isAfterInline(CaretPosition(getRoot().firstChild, 1)), true);
+    LegacyUnit.equal(CaretContainer.isAfterInline(CaretPosition(getRoot().firstChild, 0)), false);
+  });
+
+  suite.test('isAfterInline 2', function () {
+    setupHtml('a');
+    viewBlock.get().insertBefore(document.createTextNode(Zwsp.ZWSP), viewBlock.get().firstChild);
     LegacyUnit.equal(CaretContainer.isAfterInline(CaretPosition(getRoot().firstChild, 1)), true);
     LegacyUnit.equal(CaretContainer.isAfterInline(CaretPosition(getRoot().firstChild, 0)), false);
   });

@@ -1,16 +1,14 @@
 /**
- * Uploader.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { XMLHttpRequest } from '@ephox/sand';
 import Promise from 'tinymce/core/api/util/Promise';
 import Tools from 'tinymce/core/api/util/Tools';
+import { FormData } from '@ephox/dom-globals';
 
 /**
  * This is basically cut down version of tinymce.core.file.Uploader, which we could use directly
@@ -31,7 +29,7 @@ export default function (settings) {
   const defaultHandler = function (blobInfo, success, failure, progress) {
     let xhr, formData;
 
-    xhr = new XMLHttpRequest();
+    xhr = XMLHttpRequest();
     xhr.open('POST', settings.url);
     xhr.withCredentials = settings.credentials;
 

@@ -1,19 +1,16 @@
 /**
- * Editor.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import AddOnManager from './AddOnManager';
+import { AddOnManager } from './AddOnManager';
 import EditorCommands from './EditorCommands';
 import EditorObservable from './EditorObservable';
-import * as EditorSettings from '../EditorSettings';
+import { ParamTypeMap, getEditorSettings, getParam } from '../EditorSettings';
 import Env from './Env';
-import Mode from '../Mode';
+import * as Mode from '../Mode';
 import Shortcuts from './Shortcuts';
 import DOMUtils from './dom/DOMUtils';
 import DomQuery from './dom/DomQuery';
@@ -24,10 +21,13 @@ import Tools from './util/Tools';
 import URI from './util/URI';
 import Uuid from '../util/Uuid';
 import { Selection } from 'tinymce/core/api/dom/Selection';
-import * as EditorContent from 'tinymce/core/EditorContent';
+import * as EditorContent from 'tinymce/core/content/EditorContent';
 import * as EditorRemove from '../EditorRemove';
-
-/*jshint scripturl:true */
+import SelectionOverrides from 'tinymce/core/SelectionOverrides';
+import Schema from 'tinymce/core/api/html/Schema';
+import { UndoManager } from 'tinymce/core/api/UndoManager';
+import { Annotator } from 'tinymce/core/api/Annotator';
+import { HTMLElement, Document, Window, Element, HTMLInputElement, HTMLTextAreaElement } from '@ephox/dom-globals';
 
 /**
  * Include the base event class documentation.
@@ -55,9 +55,139 @@ import * as EditorRemove from '../EditorRemove';
  * ed.render();
  */
 
+export type AnyFunction = (...x: any[]) => any;
+
 export interface Editor {
+  $: any;
+  annotator: Annotator;
+  baseURI: any;
+  bodyElement: HTMLElement;
+  bookmark: any;
+  buttons: any;
+  composing: boolean;
+  container: HTMLElement;
+  contentAreaContainer: any;
+  contentCSS: any;
+  contentDocument: Document;
+  contentStyles: any;
+  contentWindow: Window;
+  contextToolbars: any;
+  delegates: any;
+  destroyed: boolean;
+  documentBaseURI: any;
+  documentBaseUrl: string;
+  dom: DOMUtils;
+  editorCommands: any;
+  editorContainer: any;
+  editorManager: any;
+  editorUpload: any;
+  eventRoot?: HTMLElement;
+  formatter: any;
+  formElement: HTMLElement;
+  formEventDelegate: any;
+  hasHiddenInput: boolean;
+  hasVisual: boolean;
+  hidden: boolean;
+  id: string;
+  iframeElement: any;
+  iframeHTML: string;
+  initialized: boolean;
+  inline: boolean;
+  isNotDirty: boolean;
+  loadedCSS: any;
+  menuItems: any;
+  notificationManager: any;
+  orgDisplay: string;
+  orgVisibility: string;
+  parser: any;
+  plugins: any;
+  quirks: any;
+  readonly: boolean;
+  removed: boolean;
+  rtl: boolean;
+  schema: Schema;
   selection: Selection;
-  [key: string]: any;
+  serializer: any;
+  settings: Record<string, any>;
+  shortcuts: any;
+  startContent: string;
+  suffix: string;
+  targetElm: HTMLElement;
+  theme: any;
+  undoManager: UndoManager;
+  validate: boolean;
+  windowManager: any;
+  _beforeUnload: AnyFunction;
+  _eventDispatcher: any;
+  _mceOldSubmit: any;
+  _nodeChangeDispatcher: any;
+  _pendingNativeEvents: any;
+  _selectionOverrides: SelectionOverrides;
+  _skinLoaded: boolean;
+
+  addButton(name: string, settings): void;
+  addCommand(name: string, callback, scope?: object): void;
+  addContextToolbar(predicate, items): void;
+  addMenuItem(name: string, settings): void;
+  addQueryStateHandler(name: string, callback, scope?: object): void;
+  addQueryValueHandler(name: string, callback, scope?: object): void;
+  addShortcut(pattern: string, desc: string, cmdFunc, scope?: object): void;
+  addSidebar(name: string, settings): void;
+  addVisual(elm?): void;
+  bindPendingEventDelegates(): void;
+  convertURL(url: string, name: string, elm?): string;
+  destroy(automatic?: boolean): void;
+  execCallback(name: string, ...x: any[]): any;
+  execCommand(cmd: string, ui?: boolean, value?: any, args?): any;
+  fire(name: string, args?, bubble?: boolean): any;
+  focus(skipFocus?: boolean): any;
+  getBody(): HTMLElement;
+  getContainer(): HTMLElement;
+  getContent(args?: EditorContent.GetContentArgs): EditorContent.Content;
+  getContentAreaContainer(): HTMLElement;
+  getDoc(): Document;
+  getElement(): HTMLElement;
+  getLang(name: string, defaultVal): any;
+  getParam<K extends keyof ParamTypeMap>(name: string, defaultVal: ParamTypeMap[K], type: K): ParamTypeMap[K];
+  getParam<T>(name: string, defaultVal: T, type: string): T;
+  getParam(name: string, defaultVal?: any, type?: string): any;
+  getWin(): Window;
+  hasEventListeners(name: string): boolean;
+  hide(): void;
+  insertContent(content, args?): void;
+  isDirty(): boolean;
+  isHidden(): boolean;
+  load(args?): string;
+  nodeChanged(args?): void;
+  off(name: string, callback?): any;
+  on(name: string, callback, prepend?): any;
+  once(name: string, callback): any;
+  queryCommandState(cmd: string): boolean;
+  queryCommandSupported(cmd: string): boolean;
+  queryCommandValue(cmd: string): any;
+  remove(): void;
+  render(): void;
+  save(args?: SaveArgs): void;
+  setContent(content: EditorContent.Content, args?: EditorContent.SetContentArgs): void;
+  setDirty(state: boolean): void;
+  setMode(mode: string): void;
+  setProgressState(state: boolean, time?: number): void;
+  show(): void;
+  toggleNativeEvent(name: string, state): void;
+  translate(text: string): string;
+  unbindAllNativeEvents(): void;
+  uploadImages(callback): void;
+  _scanForImages(): void;
+}
+
+export interface SaveArgs {
+  is_removing?: boolean;
+  save?: boolean;
+  element?: Element;
+  content?: any;
+  no_events?: boolean;
+  format?: 'raw';
+  set_dirty?: boolean;
 }
 
 // Shorten these names
@@ -83,10 +213,8 @@ const ie = Env.ie;
  */
 export const Editor = function (id, settings, editorManager) {
   const self = this;
-  let documentBaseUrl, baseUri;
-
-  documentBaseUrl = self.documentBaseUrl = editorManager.documentBaseURL;
-  baseUri = editorManager.baseURI;
+  const documentBaseUrl = self.documentBaseUrl = editorManager.documentBaseURL;
+  const baseUri = editorManager.baseURI;
 
   /**
    * Name/value collection with editor settings.
@@ -97,7 +225,7 @@ export const Editor = function (id, settings, editorManager) {
    * // Get the value of the theme setting
    * tinymce.activeEditor.windowManager.alert("You are using the " + tinymce.activeEditor.settings.theme + " theme");
    */
-  settings = EditorSettings.getEditorSettings(self, id, documentBaseUrl, editorManager.defaultSettings, settings);
+  settings = getEditorSettings(self, id, documentBaseUrl, editorManager.defaultSettings, settings);
   self.settings = settings;
 
   AddOnManager.language = settings.language || 'en';
@@ -238,6 +366,16 @@ Editor.prototype = {
   },
 
   /**
+   * Returns true/false if the editor has real keyboard focus.
+   *
+   * @method hasFocus
+   * @return {Boolean} Current focus state of the editor.
+   */
+  hasFocus () {
+    return EditorFocus.hasFocus(this);
+  },
+
+  /**
    * Executes a legacy callback. This method is useful to call old 2.x option callbacks.
    * There new event model is a better way to add callback so this method might be removed in the future.
    *
@@ -245,7 +383,7 @@ Editor.prototype = {
    * @param {String} name Name of the callback to execute.
    * @return {Object} Return value passed from callback function.
    */
-  execCallback (name) {
+  execCallback (name, ...x: any[]) {
     const self = this;
     let callback = self.settings[name], scope;
 
@@ -320,7 +458,7 @@ Editor.prototype = {
    * var someval2 = tinymce.get('my_editor').getParam('myvalue');
    */
   getParam (name: string, defaultVal?: any, type?: string): any {
-    return EditorSettings.getParam(this, name, defaultVal, type);
+    return getParam(this, name, defaultVal, type);
   },
 
   /**
@@ -375,7 +513,6 @@ Editor.prototype = {
       settings.icon = name;
     }
 
-    self.buttons = self.buttons;
     settings.tooltip = settings.tooltip || settings.title;
     self.buttons[name] = settings;
   },
@@ -439,7 +576,6 @@ Editor.prototype = {
       };
     }
 
-    self.menuItems = self.menuItems;
     self.menuItems[name] = settings;
   },
 
@@ -737,8 +873,8 @@ Editor.prototype = {
    * @param {Object} args Optional content object, this gets passed around through the whole save process.
    * @return {String} HTML string that got set into the textarea/div.
    */
-  save (args) {
-    const self = this;
+  save (args: SaveArgs) {
+    const self: Editor = this;
     let elm = self.getElement(), html, form;
 
     if (!elm || !self.initialized || self.removed) {
@@ -763,8 +899,7 @@ Editor.prototype = {
     html = args.content;
 
     if (!/TEXTAREA|INPUT/i.test(elm.nodeName)) {
-      // Update DIV element when not in inline mode
-      if (!self.inline) {
+      if (args.is_removing || !self.inline) {
         elm.innerHTML = html;
       }
 
@@ -778,7 +913,7 @@ Editor.prototype = {
         });
       }
     } else {
-      elm.value = html;
+      (elm as HTMLInputElement | HTMLTextAreaElement).value = html;
     }
 
     args.element = elm = null;
@@ -1044,7 +1179,7 @@ Editor.prototype = {
   addVisual (elm) {
     const self = this;
     const settings = self.settings;
-    const dom = self.dom;
+    const dom: DOMUtils = self.dom;
     let cls;
 
     elm = elm || self.getBody();
@@ -1070,7 +1205,7 @@ Editor.prototype = {
           return;
 
         case 'A':
-          if (!dom.getAttrib(elm, 'href', false)) {
+          if (!dom.getAttrib(elm, 'href')) {
             value = dom.getAttrib(elm, 'name') || elm.id;
             cls = settings.visual_anchor_class || 'mce-item-anchor';
 

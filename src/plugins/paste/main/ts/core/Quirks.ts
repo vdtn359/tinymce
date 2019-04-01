@@ -1,11 +1,8 @@
 /**
- * Quirks.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Env from 'tinymce/core/api/Env';
@@ -14,6 +11,7 @@ import Settings from '../api/Settings';
 import Utils from './Utils';
 import WordFilter from './WordFilter';
 import { Editor } from 'tinymce/core/api/Editor';
+import { Element } from '@ephox/dom-globals';
 
 /**
  * This class contains various fixes for browsers. These issues can not be feature
@@ -111,7 +109,7 @@ function removeWebKitStyles(editor: Editor, content: string, internal: boolean, 
     const dom = editor.dom, node = editor.selection.getNode();
 
     content = content.replace(/(<[^>]+) style="([^"]*)"([^>]*>)/gi, function (all, before, value, after) {
-      const inputStyles = dom.parseStyle(dom.decode(value), 'span');
+      const inputStyles = dom.parseStyle(dom.decode(value));
       let outputStyles = {};
 
       if (webKitStyles === 'none') {
@@ -122,7 +120,7 @@ function removeWebKitStyles(editor: Editor, content: string, internal: boolean, 
         let inputValue = inputStyles[webKitStyles[i]], currentValue = dom.getStyle(node, webKitStyles[i], true);
 
         if (/color/.test(webKitStyles[i])) {
-          inputValue = dom.toHex(inputValue);
+          inputValue = dom.toHex(inputValue as string);
           currentValue = dom.toHex(currentValue);
         }
 

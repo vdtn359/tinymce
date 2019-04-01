@@ -1,11 +1,18 @@
-import { Representing } from '@ephox/alloy';
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
+import { Representing, SketchSpec } from '@ephox/alloy';
 import { Option, Thunk } from '@ephox/katamari';
 
 import LinkBridge from '../bridge/LinkBridge';
 import RangePreserver from '../util/RangePreserver';
 import Buttons from './Buttons';
-import Inputs from './Inputs';
-import SerialisedDialog from './SerialisedDialog';
+import * as Inputs from './Inputs';
+import * as SerialisedDialog from './SerialisedDialog';
 
 const getGroups = Thunk.cached(function (realm, editor) {
   return [
@@ -41,7 +48,7 @@ const getGroups = Thunk.cached(function (realm, editor) {
   ];
 });
 
-const sketch = function (realm, editor) {
+const sketch = function (realm, editor): SketchSpec {
   return Buttons.forToolbarStateAction(editor, 'link', 'link', function () {
     const groups = getGroups(realm, editor);
 
@@ -62,6 +69,6 @@ const sketch = function (realm, editor) {
   });
 };
 
-export default {
+export {
   sketch
 };

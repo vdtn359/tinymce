@@ -1,21 +1,18 @@
 /**
- * Buttons.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import { Fun } from '@ephox/katamari';
 import Tools from 'tinymce/core/api/util/Tools';
-import TableDialog from './TableDialog';
 import { getToolbar } from '../api/Settings';
+import { Editor } from 'tinymce/core/api/Editor';
+import { Node } from '@ephox/dom-globals';
 
 const each = Tools.each;
 
-const addButtons = function (editor) {
+const addButtons = function (editor: Editor) {
   const menuItems = [];
   each('inserttable tableprops deletetable | cell row column'.split(' '), function (name) {
     if (name === '|') {
@@ -31,7 +28,7 @@ const addButtons = function (editor) {
     menu: menuItems
   });
 
-  function cmd(command) {
+  function cmd(command: string) {
     return function () {
       editor.execCommand(command);
     };
@@ -39,7 +36,7 @@ const addButtons = function (editor) {
 
   editor.addButton('tableprops', {
     title: 'Table properties',
-    onclick: Fun.curry(TableDialog.open, editor, true),
+    onclick: cmd('mceTableProps'),
     icon: 'table'
   });
 
@@ -119,8 +116,8 @@ const addButtons = function (editor) {
   });
 };
 
-const addToolbars = function (editor) {
-  const isTable = function (table) {
+const addToolbars = function (editor: Editor) {
+  const isTable = function (table: Node) {
     const selectorMatched = editor.dom.is(table, 'table') && editor.getBody().contains(table);
 
     return selectorMatched;

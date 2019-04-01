@@ -1,17 +1,15 @@
 /**
- * CutCopy.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Env from 'tinymce/core/api/Env';
 import InternalHtml from './InternalHtml';
 import Utils from './Utils';
 import { Editor } from 'tinymce/core/api/Editor';
+import { DataTransfer, ClipboardEvent, Range } from '@ephox/dom-globals';
 
 const noop = function () {
 };
@@ -57,11 +55,11 @@ const setClipboardData = (evt: ClipboardEvent, data: SelectionContentData, fallb
 
 const fallback = (editor: Editor): FallbackFn => (html, done) => {
   const markedHtml = InternalHtml.mark(html);
-  const outer: HTMLDivElement = editor.dom.create('div', {
+  const outer = editor.dom.create('div', {
     'contenteditable': 'false',
     'data-mce-bogus': 'all'
   });
-  const inner: HTMLDivElement = editor.dom.create('div', { contenteditable: 'true' }, markedHtml);
+  const inner = editor.dom.create('div', { contenteditable: 'true' }, markedHtml);
   editor.dom.setStyles(outer, {
     position: 'fixed',
     top: '0',
@@ -93,8 +91,16 @@ const getData = (editor: Editor): SelectionContentData => (
   }
 );
 
+const isTableSelection = (editor: Editor): boolean => {
+  return !!editor.dom.getParent(editor.selection.getStart(), 'td[data-mce-selected],th[data-mce-selected]', editor.getBody());
+};
+
+const hasSelectedContent = (editor: Editor): boolean => {
+  return !editor.selection.isCollapsed() || isTableSelection(editor);
+};
+
 const cut = (editor: Editor) => (evt: ClipboardEvent) => {
-  if (editor.selection.isCollapsed() === false) {
+  if (hasSelectedContent(editor)) {
     setClipboardData(evt, getData(editor), fallback(editor), () => {
       // Chrome fails to execCommand from another execCommand with this message:
       // "We don't execute document.execCommand() this time, because it is called recursively.""
@@ -106,7 +112,7 @@ const cut = (editor: Editor) => (evt: ClipboardEvent) => {
 };
 
 const copy = (editor: Editor) => (evt: ClipboardEvent) => {
-  if (editor.selection.isCollapsed() === false) {
+  if (hasSelectedContent(editor)) {
     setClipboardData(evt, getData(editor), fallback(editor), noop);
   }
 };

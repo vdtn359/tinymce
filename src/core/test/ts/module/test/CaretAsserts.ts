@@ -1,6 +1,7 @@
 import { Assertions } from '@ephox/agar';
 import { LegacyUnit } from '@ephox/mcagar';
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
+import { Range } from '@ephox/dom-globals';
 
 const assertCaretPosition = function (actual, expected, message?) {
   if (expected === null) {
@@ -13,7 +14,8 @@ const assertCaretPosition = function (actual, expected, message?) {
     return;
   }
 
-  Assertions.assertEq(message, true, expected.isEqual(actual));
+  const defaultMessage = `["${expected.getNode().textContent}", ${expected.offset()}] doesn't match actual position ["${actual.getNode().textContent}", ${actual.offset()}]`;
+  Assertions.assertEq(message || defaultMessage, true, expected.isEqual(actual));
 };
 
 const assertRange = function (expected, actual) {
@@ -23,7 +25,7 @@ const assertRange = function (expected, actual) {
   Assertions.assertEq('endOffset should be equal', true, expected.endOffset === actual.endOffset);
 };
 
-const createRange = function (startContainer, startOffset, endContainer?, endOffset?) {
+const createRange = function (startContainer, startOffset, endContainer?, endOffset?): Range {
   const rng = DOMUtils.DOM.createRng();
 
   rng.setStart(startContainer, startOffset);

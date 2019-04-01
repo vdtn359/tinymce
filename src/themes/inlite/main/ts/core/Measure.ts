@@ -1,17 +1,17 @@
 /**
- * Measure.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
 import Convert from './Convert';
+import { Editor } from 'tinymce/core/api/Editor';
+import { GeomRect } from 'tinymce/core/api/geom/Rect';
+import { HTMLElement } from '@ephox/dom-globals';
 
-const toAbsolute = function (rect) {
+const toAbsolute = function (rect: GeomRect): GeomRect {
   const vp = DOMUtils.DOM.getViewPort();
 
   return {
@@ -22,7 +22,7 @@ const toAbsolute = function (rect) {
   };
 };
 
-const measureElement = function (elm) {
+const measureElement = function (elm: HTMLElement) {
   const clientRect = elm.getBoundingClientRect();
 
   return toAbsolute({
@@ -33,19 +33,19 @@ const measureElement = function (elm) {
   });
 };
 
-const getElementRect = function (editor, elm) {
+const getElementRect = function (editor: Editor, elm: HTMLElement) {
   return measureElement(elm);
 };
 
-const getPageAreaRect = function (editor) {
+const getPageAreaRect = function (editor: Editor) {
   return measureElement(editor.getElement().ownerDocument.body);
 };
 
-const getContentAreaRect = function (editor) {
+const getContentAreaRect = function (editor: Editor) {
   return measureElement(editor.getContentAreaContainer() || editor.getBody());
 };
 
-const getSelectionRect = function (editor) {
+const getSelectionRect = function (editor: Editor) {
   const clientRect = editor.selection.getBoundingClientRect();
   return clientRect ? toAbsolute(Convert.fromClientRect(clientRect)) : null;
 };

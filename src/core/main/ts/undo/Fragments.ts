@@ -1,16 +1,15 @@
 /**
- * Fragments.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Entities from '../api/html/Entities';
 import Diff from './Diff';
-import Arr from '../util/Arr';
+import NodeType from 'tinymce/core/dom/NodeType';
+import { Node, DocumentFragment, document, Element } from '@ephox/dom-globals';
+import { Arr } from '@ephox/katamari';
 
 /**
  * This module reads and applies html fragments from/to dom nodes.
@@ -19,19 +18,19 @@ import Arr from '../util/Arr';
  * @private
  */
 
-const getOuterHtml = function (elm) {
-  if (elm.nodeType === 1) {
+const getOuterHtml = function (elm: Node): string {
+  if (NodeType.isElement(elm)) {
     return elm.outerHTML;
-  } else if (elm.nodeType === 3) {
+  } else if (NodeType.isText(elm)) {
     return Entities.encodeRaw(elm.data, false);
-  } else if (elm.nodeType === 8) {
+  } else if (NodeType.isComment(elm)) {
     return '<!--' + elm.data + '-->';
   }
 
   return '';
 };
 
-const createFragment = function (html) {
+const createFragment = function (html: string): DocumentFragment {
   let frag, node, container;
 
   container = document.createElement('div');
@@ -48,7 +47,7 @@ const createFragment = function (html) {
   return frag;
 };
 
-const insertAt = function (elm, html, index) {
+const insertAt = function (elm: Element, html: string, index: number) {
   const fragment = createFragment(html);
   if (elm.hasChildNodes() && index < elm.childNodes.length) {
     const target = elm.childNodes[index];
@@ -58,14 +57,14 @@ const insertAt = function (elm, html, index) {
   }
 };
 
-const removeAt = function (elm, index) {
+const removeAt = function (elm: Element, index: number) {
   if (elm.hasChildNodes() && index < elm.childNodes.length) {
     const target = elm.childNodes[index];
     target.parentNode.removeChild(target);
   }
 };
 
-const applyDiff = function (diff, elm) {
+const applyDiff = function (diff, elm: Element) {
   let index = 0;
   Arr.each(diff, function (action) {
     if (action[0] === Diff.KEEP) {
@@ -79,14 +78,14 @@ const applyDiff = function (diff, elm) {
   });
 };
 
-const read = function (elm) {
-  return Arr.filter(Arr.map(elm.childNodes, getOuterHtml), function (item) {
+const read = function (elm: Element): string[] {
+  return Arr.filter(Arr.map(Arr.from(elm.childNodes), getOuterHtml), function (item) {
     return item.length > 0;
   });
 };
 
-const write = function (fragments, elm) {
-  const currentFragments = Arr.map(elm.childNodes, getOuterHtml);
+const write = function (fragments: string[], elm: Element): Element {
+  const currentFragments = Arr.map(Arr.from(elm.childNodes), getOuterHtml);
   applyDiff(Diff.diff(currentFragments, fragments), elm);
   return elm;
 };

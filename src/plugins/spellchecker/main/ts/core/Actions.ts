@@ -1,11 +1,8 @@
 /**
- * Actions.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Tools from 'tinymce/core/api/util/Tools';
@@ -13,10 +10,12 @@ import URI from 'tinymce/core/api/util/URI';
 import XHR from 'tinymce/core/api/util/XHR';
 import Events from '../api/Events';
 import Settings from '../api/Settings';
-import DomTextMatcher from './DomTextMatcher';
+import { DomTextMatcher } from './DomTextMatcher';
 import { Editor } from 'tinymce/core/api/Editor';
+import { Cell } from '@ephox/katamari';
+import { Element, HTMLElement } from '@ephox/dom-globals';
 
-type Data = string | {words: any, dictionary?: any};
+export type Data = string | {words: Record<string, string[]>, dictionary?: any};
 
 const getTextMatcher = function (editor, textMatcherState) {
   if (!textMatcherState.get()) {
@@ -35,8 +34,8 @@ const isEmpty = function (obj) {
   return true;
 };
 
-const defaultSpellcheckCallback = function (editor, pluginUrl, currentLanguageState) {
-  return function (method, text, doneCallback, errorCallback) {
+const defaultSpellcheckCallback = function (editor: Editor, pluginUrl: string, currentLanguageState: Cell<string>) {
+  return function (method: string, text: string, doneCallback: Function, errorCallback: Function) {
     const data = { method, lang: currentLanguageState.get() };
     let postData = '';
 
@@ -77,13 +76,13 @@ const defaultSpellcheckCallback = function (editor, pluginUrl, currentLanguageSt
   };
 };
 
-const sendRpcCall = function (editor: Editor, pluginUrl: string, currentLanguageState, name: string, data: Data, successCallback: Function, errorCallback?: Function) {
+const sendRpcCall = function (editor: Editor, pluginUrl: string, currentLanguageState: Cell<string>, name: string, data: string, successCallback: Function, errorCallback?: Function) {
   const userSpellcheckCallback = Settings.getSpellcheckerCallback(editor);
   const spellCheckCallback = userSpellcheckCallback ? userSpellcheckCallback : defaultSpellcheckCallback(editor, pluginUrl, currentLanguageState);
   spellCheckCallback.call(editor.plugins.spellchecker, name, data, successCallback, errorCallback);
 };
 
-const spellcheck = function (editor: Editor, pluginUrl: string, startedState, textMatcherState, lastSuggestionsState, currentLanguageState) {
+const spellcheck = function (editor: Editor, pluginUrl: string, startedState: Cell<boolean>, textMatcherState: Cell<DomTextMatcher>, lastSuggestionsState: Cell<LastSuggestion>, currentLanguageState: Cell<string>) {
   if (finish(editor, startedState, textMatcherState)) {
     return;
   }
@@ -103,13 +102,13 @@ const spellcheck = function (editor: Editor, pluginUrl: string, startedState, te
   editor.focus();
 };
 
-const checkIfFinished = function (editor, startedState, textMatcherState) {
+const checkIfFinished = function (editor: Editor, startedState: Cell<boolean>, textMatcherState: Cell<DomTextMatcher>) {
   if (!editor.dom.select('span.mce-spellchecker-word').length) {
     finish(editor, startedState, textMatcherState);
   }
 };
 
-const addToDictionary = function (editor: Editor, pluginUrl: string, startedState, textMatcherState, currentLanguageState, word: string, spans: Element[]) {
+const addToDictionary = function (editor: Editor, pluginUrl: string, startedState: Cell<boolean>, textMatcherState: Cell<DomTextMatcher>, currentLanguageState: Cell<string>, word: string, spans: Element[]) {
   editor.setProgressState(true);
 
   sendRpcCall(editor, pluginUrl, currentLanguageState, 'addToDictionary', word, () => {
@@ -122,7 +121,7 @@ const addToDictionary = function (editor: Editor, pluginUrl: string, startedStat
   });
 };
 
-const ignoreWord = function (editor: Editor, startedState, textMatcherState, word: string, spans: Element[], all?) {
+const ignoreWord = function (editor: Editor, startedState: Cell<boolean>, textMatcherState: Cell<DomTextMatcher>, word: string, spans: Element[], all?: boolean) {
   editor.selection.collapse();
 
   if (all) {
@@ -138,8 +137,11 @@ const ignoreWord = function (editor: Editor, startedState, textMatcherState, wor
   checkIfFinished(editor, startedState, textMatcherState);
 };
 
-const finish = function (editor, startedState, textMatcherState) {
+const finish = function (editor: Editor, startedState: Cell<boolean>, textMatcherState: Cell<DomTextMatcher>) {
+  const bookmark = editor.selection.getBookmark();
   getTextMatcher(editor, textMatcherState).reset();
+  editor.selection.moveToBookmark(bookmark);
+
   textMatcherState.set(null);
 
   if (startedState.get()) {
@@ -149,7 +151,7 @@ const finish = function (editor, startedState, textMatcherState) {
   }
 };
 
-const getElmIndex = function (elm) {
+const getElmIndex = function (elm: HTMLElement) {
   const value = elm.getAttribute('data-mce-index');
 
   if (typeof value === 'number') {
@@ -159,7 +161,7 @@ const getElmIndex = function (elm) {
   return value;
 };
 
-const findSpansByIndex = function (editor, index) {
+const findSpansByIndex = function (editor: Editor, index: string) {
   let nodes;
   const spans = [];
 
@@ -181,7 +183,12 @@ const findSpansByIndex = function (editor, index) {
   return spans;
 };
 
-const markErrors = function (editor, startedState, textMatcherState, lastSuggestionsState, data: Data) {
+export interface LastSuggestion {
+  suggestions: string | string[];
+  hasDictionarySupport: boolean;
+}
+
+const markErrors = function (editor: Editor, startedState: Cell<boolean>, textMatcherState: Cell<DomTextMatcher>, lastSuggestionsState: Cell<LastSuggestion>, data: Data) {
   let suggestions, hasDictionarySupport;
 
   if (typeof data !== 'string' && data.words) {
@@ -206,6 +213,8 @@ const markErrors = function (editor, startedState, textMatcherState, lastSuggest
     hasDictionarySupport
   });
 
+  const bookmark = editor.selection.getBookmark();
+
   getTextMatcher(editor, textMatcherState).find(Settings.getSpellcheckerWordcharPattern(editor)).filter(function (match) {
     return !!suggestions[match.text];
   }).wrap(function (match) {
@@ -215,6 +224,8 @@ const markErrors = function (editor, startedState, textMatcherState, lastSuggest
       'data-mce-word': match.text
     });
   });
+
+  editor.selection.moveToBookmark(bookmark);
 
   startedState.set(true);
   Events.fireSpellcheckStart(editor);

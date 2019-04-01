@@ -1,11 +1,8 @@
 /**
- * SelectionUtils.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr, Fun, Option, Options } from '@ephox/katamari';
@@ -14,6 +11,8 @@ import NodeType from '../dom/NodeType';
 import Env from '../api/Env';
 import TreeWalker from '../api/dom/TreeWalker';
 import Tools from '../api/util/Tools';
+import { Editor } from 'tinymce/core/api/Editor';
+import { Range } from '@ephox/dom-globals';
 
 const getStartNode = function (rng) {
   const sc = rng.startContainer, so = rng.startOffset;
@@ -118,7 +117,13 @@ const moveEndPoint = (dom, rng: Range, node, start: boolean): void => {
   }
 };
 
+const hasAnyRanges = (editor: Editor) => {
+  const sel = editor.selection.getSel();
+  return sel && sel.rangeCount > 0;
+};
+
 export {
   hasAllContentsSelected,
-  moveEndPoint
+  moveEndPoint,
+  hasAnyRanges
 };

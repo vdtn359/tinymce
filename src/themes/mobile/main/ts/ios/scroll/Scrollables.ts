@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { Fun } from '@ephox/katamari';
 import { Attr, DomEvent, SelectorFind } from '@ephox/sugar';
 
@@ -32,7 +39,7 @@ const markAsHorizontal = function (container) {
 };
 
 const hasScroll = function (container) {
-  return Attr.get(container, dataHorizontal) === 'true' ? hasHorizontalScroll : hasVerticalScroll;
+  return Attr.get(container, dataHorizontal) === 'true' ? hasHorizontalScroll(container) : hasVerticalScroll(container);
 };
 
 /*

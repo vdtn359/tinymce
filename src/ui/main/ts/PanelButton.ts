@@ -1,11 +1,8 @@
 /**
- * PanelButton.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Button from './Button';
@@ -60,10 +57,17 @@ export default Button.extend({
       self.panel.show();
     }
 
-    const rel = self.panel.testMoveRel(self.getEl(), settings.popoverAlign || (self.isRtl() ? ['bc-tc', 'bc-tl', 'bc-tr'] : ['bc-tc', 'bc-tr', 'bc-tl']));
+    const rtlRels = ['bc-tc', 'bc-tl', 'bc-tr'];
+    const ltrRels = ['bc-tc', 'bc-tr', 'bc-tl', 'tc-bc', 'tc-br', 'tc-bl'];
+    const rel: string = self.panel.testMoveRel(self.getEl(), settings.popoverAlign || (self.isRtl() ? rtlRels : ltrRels));
 
-    self.panel.classes.toggle('start', rel === 'bc-tl');
-    self.panel.classes.toggle('end', rel === 'bc-tr');
+    self.panel.classes.toggle('start', rel.substr(-1) === 'l');
+    self.panel.classes.toggle('end', rel.substr(-1) === 'r');
+
+    const isTop = rel.substr(0, 1) === 't';
+
+    self.panel.classes.toggle('bottom', !isTop);
+    self.panel.classes.toggle('top', isTop);
 
     self.panel.moveRel(self.getEl(), rel);
   },

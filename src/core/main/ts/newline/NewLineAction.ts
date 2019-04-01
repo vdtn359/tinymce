@@ -1,11 +1,8 @@
 /**
- * NewLineAction.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Adt,  Arr,  Option } from '@ephox/katamari';
@@ -37,12 +34,15 @@ const inListBlock = function (requiredState) {
   };
 };
 
-const inPreBlock = function (requiredState) {
+const inBlock = (blockName: string, requiredState: boolean) => {
   return function (editor, shiftKey) {
-    const inPre = NewLineUtils.getParentBlockName(editor) === 'PRE';
-    return inPre === requiredState;
+    const state = NewLineUtils.getParentBlockName(editor) === blockName.toUpperCase();
+    return state === requiredState;
   };
 };
+
+const inPreBlock = (requiredState: boolean) => inBlock('pre', requiredState);
+const inSummaryBlock = () => inBlock('summary', true);
 
 const shouldPutBrInPre = function (requiredState) {
   return function (editor, shiftKey) {
@@ -78,6 +78,7 @@ const match = function (predicates, action) {
 const getAction = function (editor, evt) {
   return LazyEvaluator.evaluateUntil([
     match([shouldBlockNewLine], newLineAction.none()),
+    match([inSummaryBlock()], newLineAction.br()),
     match([inPreBlock(true), shouldPutBrInPre(false), hasShiftKey], newLineAction.br()),
     match([inPreBlock(true), shouldPutBrInPre(false)], newLineAction.block()),
     match([inPreBlock(true), shouldPutBrInPre(true), hasShiftKey], newLineAction.block()),

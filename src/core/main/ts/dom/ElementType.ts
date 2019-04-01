@@ -1,11 +1,8 @@
 /**
- * ElementType.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr, Fun } from '@ephox/katamari';
@@ -37,6 +34,7 @@ const textBlocks = [
 const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 const listItems = ['li', 'dd', 'dt'];
 const lists = ['ul', 'ol', 'dl'];
+const wsElements = ['pre', 'script', 'textarea', 'style'];
 
 const lazyLookup = function (items) {
   let lookup;
@@ -56,6 +54,7 @@ const isListItem = lazyLookup(listItems);
 const isVoid = lazyLookup(voids);
 const isTableSection = lazyLookup(tableSections);
 const isTableCell = lazyLookup(tableCells);
+const isWsPreserveElement = lazyLookup(wsElements);
 
 export {
   isBlock,
@@ -67,5 +66,6 @@ export {
   isVoid,
   isTableSection,
   isTableCell,
-  isBr
+  isBr,
+  isWsPreserveElement
 };

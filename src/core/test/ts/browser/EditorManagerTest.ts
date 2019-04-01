@@ -9,6 +9,7 @@ import Delay from 'tinymce/core/api/util/Delay';
 import Tools from 'tinymce/core/api/util/Tools';
 import Theme from 'tinymce/themes/modern/Theme';
 import { UnitTest } from '@ephox/bedrock';
+import { document } from '@ephox/dom-globals';
 
 UnitTest.asynctest('browser.tinymce.core.EditorManagerTest', function () {
   const success = arguments[arguments.length - 2];
@@ -116,7 +117,7 @@ UnitTest.asynctest('browser.tinymce.core.EditorManagerTest', function () {
             init_instance_callback (editor2) {
               LegacyUnit.equal(EditorManager.get().length, 1);
               LegacyUnit.equal(editor1.id, editor2.id);
-              LegacyUnit.equal(editor1.destroyed, 1, 'First editor instance should be destroyed');
+              LegacyUnit.equal(editor1.destroyed, true, 'First editor instance should be destroyed');
 
               teardown(done);
             }

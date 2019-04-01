@@ -672,12 +672,32 @@ UnitTest.asynctest('browser.tinymce.core.html.SaxParserTest', function () {
     writer.reset();
     parser.parse(
       '<a href="javascript:alert(1)">1</a>' +
-      '<a href="data:text/html;base64,PHN2Zy9vbmxvYWQ9YWxlcnQoMik+">2</a>'
+      '<a href="data:text/html;base64,PHN2Zy9vbmxvYWQ9YWxlcnQoMik+">2</a>' +
+      '<a href="data:image/svg+xml;base64,x">3</a>'
     );
     LegacyUnit.equal(
       writer.getContent(),
       '<a>1</a>' +
-      '<a href="data:text/html;base64,PHN2Zy9vbmxvYWQ9YWxlcnQoMik+">2</a>'
+      '<a href="data:text/html;base64,PHN2Zy9vbmxvYWQ9YWxlcnQoMik+">2</a>' +
+      '<a href="data:image/svg+xml;base64,x">3</a>'
+    );
+  });
+
+  suite.test('Parse script urls (disallow svg data image uris)', function () {
+    let counter, parser;
+
+    counter = createCounter(writer);
+    counter.validate = false;
+    counter.allow_html_data_urls = false;
+    counter.allow_svg_data_urls = false;
+    parser = SaxParser(counter, schema);
+    writer.reset();
+    parser.parse(
+      '<a href="data:image/svg+xml;base64,x">1</a>'
+    );
+    LegacyUnit.equal(
+      writer.getContent(),
+      '<a>1</a>'
     );
   });
 
@@ -703,6 +723,7 @@ UnitTest.asynctest('browser.tinymce.core.html.SaxParserTest', function () {
       '<button formaction="javascript:alert(11)">11</button>' +
       '<table background="javascript:alert(12)"><tr><tr>12</tr></tr></table>' +
       '<a href="mhtml:13">13</a>' +
+      '<a xlink:href="jAvaScript:alert(1)">14</a>' +
       '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">' +
       '<a href="%E3%82%AA%E3%83%BC%E3%83">Invalid url</a>'
     );
@@ -710,7 +731,7 @@ UnitTest.asynctest('browser.tinymce.core.html.SaxParserTest', function () {
     LegacyUnit.equal(
       writer.getContent(),
       '<a>1</a><a>2</a><a>3</a><a>4</a><a>5</a><a>6</a><a>7</a><a>8</a><a>9</a>' +
-      '<object>10</object><button>11</button><table><tr></tr><tr>12</tr></table><a>13</a>' +
+      '<object>10</object><button>11</button><table><tr></tr><tr>12</tr></table><a>13</a><a>14</a>' +
       '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />' +
       '<a href="%E3%82%AA%E3%83%BC%E3%83">Invalid url</a>'
     );
@@ -740,6 +761,16 @@ UnitTest.asynctest('browser.tinymce.core.html.SaxParserTest', function () {
     testBogusSaxParse('a<b data-mce-bogus="all"><b attr="x">b</b></b>c', 'ac', { text: 2 });
     testBogusSaxParse('a<b data-mce-bogus="all"></b>c', 'ac', { text: 2 });
     testBogusSaxParse('a<b data-mce-bogus="all"></b><b>c</b>', 'a<b>c</b>', { start: 1, end: 1, text: 2 });
+  });
+
+  suite.test('remove bogus elements even if not part of valid_elements', () => {
+    const schema = Schema({ valid_elements: 'p,span,' });
+    const writer = Writer();
+    const counter = createCounter(writer);
+    const parser = SaxParser(counter, schema);
+    parser.parse('<p>a <div data-mce-bogus="all">&nbsp;<span contenteditable="false">X</span>&nbsp;</div>b</p>');
+    LegacyUnit.equal(writer.getContent(), '<p>a b</p>');
+    LegacyUnit.deepEqual(counter.counts, { start: 1, end: 1, text: 2 });
   });
 
   suite.test('findEndTag', function () {

@@ -1,24 +1,22 @@
 /**
- * Prism.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
- *
- * Import of prism. Disabled DOMContentLoaded event listener.
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
+
+import { self, document, Worker } from '@ephox/dom-globals';
 
 /*eslint-disable*/
 
 /*eslint-enable */
 
 declare const WorkerGlobalScope: any;
-declare const module: any;
-declare const global: any;
 
-const window = {};
+const window: any = {};
+const global: any = window;
+const module: any = { exports: {} };
+
 // ------------------ Start wrap
 
 /* http://prismjs.com/download.html?themes=prism-dark&languages=markup+css+clike+javascript+c+csharp+cpp+java+php+python+ruby */

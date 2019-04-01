@@ -1,15 +1,12 @@
 /**
- * EditorManager.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr, Type } from '@ephox/katamari';
-import AddOnManager from './AddOnManager';
+import { AddOnManager } from './AddOnManager';
 import { Editor } from './Editor';
 import Env from './Env';
 import ErrorReporter from '../ErrorReporter';
@@ -21,6 +18,7 @@ import Observable from './util/Observable';
 import Promise from './util/Promise';
 import Tools from './util/Tools';
 import URI from './util/URI';
+import { document } from '@ephox/dom-globals';
 
 declare const window: any;
 
@@ -48,11 +46,15 @@ const isValidLegacyKey = function (id) {
 };
 
 const globalEventDelegate = function (e) {
+  const type = e.type;
   each(EditorManager.get(), function (editor) {
-    if (e.type === 'scroll') {
-      editor.fire('ScrollWindow', e);
-    } else {
-      editor.fire('ResizeWindow', e);
+    switch (type) {
+      case 'scroll':
+        editor.fire('ScrollWindow', e);
+        break;
+      case 'resize':
+        editor.fire('ResizeWindow', e);
+        break;
     }
   });
 };
@@ -638,8 +640,6 @@ EditorManager = {
 
     // Remove editors by selector
     if (Type.isString(selector)) {
-      selector = selector.selector || selector;
-
       each(DOM.select(selector), function (elm) {
         editor = self.get(elm.id);
 

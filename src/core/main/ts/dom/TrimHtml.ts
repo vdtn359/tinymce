@@ -1,11 +1,8 @@
 /**
- * TrimHtml.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import SaxParser from '../api/html/SaxParser';
@@ -43,12 +40,11 @@ const trimInternal = function (serializer, html) {
     bogusAllRegExp.lastIndex = index - matchLength;
   }
 
-  return content;
+  return Zwsp.trim(content);
 };
 
-const trimExternal = function (serializer, html) {
-  return Zwsp.trim(trimInternal(serializer, html));
-};
+// We might need external/internal trimming in the future so lets keep the separation
+const trimExternal = trimInternal;
 
 export default {
   trimExternal,

@@ -1,15 +1,13 @@
 /**
- * OpenUrl.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
 import Env from 'tinymce/core/api/Env';
+import { document, window } from '@ephox/dom-globals';
 
 const appendClickRemove = function (link, evt) {
   document.body.appendChild(link);
@@ -33,7 +31,7 @@ const open = function (url) {
 
     appendClickRemove(link, evt);
   } else {
-    const win = window.open('', '_blank');
+    const win: any = window.open('', '_blank');
     if (win) {
       win.opener = null;
       const doc = win.document;

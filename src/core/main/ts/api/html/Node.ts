@@ -1,11 +1,8 @@
 /**
- * Node.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 export type ElementMap = Array<{ [name: string]: boolean; }>;
@@ -153,7 +150,7 @@ class Node {
    * @param {String} value Optional value to set.
    * @return {String/tinymce.html.Node} String or undefined on a get operation or the current node on a set operation.
    */
-  public attr (name: string, value?: string): String | Node {
+  public attr (name: string | Record<string, string>, value?: string): String | Node {
     const self = this;
     let attrs: Attributes, i;
 

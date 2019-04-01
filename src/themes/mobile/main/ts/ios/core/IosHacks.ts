@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { Focus, WindowSelection } from '@ephox/sugar';
 
 const setSelectionAtTouch = function (editorApi, touchEvent) {
@@ -14,8 +21,7 @@ const setSelectionAtTouch = function (editorApi, touchEvent) {
   // we have to live with this until we control selection
   const touch = touchEvent.raw().changedTouches[0];
   WindowSelection.getAtPoint(editorApi.win(), touch.pageX, touch.pageY).each(function (raw) {
-    const sel = WindowSelection.deriveExact(editorApi.win(), raw);
-    editorApi.setSelection(sel.start(), sel.soffset(), sel.finish(), sel.foffset());
+    editorApi.setSelection(raw.start(), raw.soffset(), raw.finish(), raw.foffset());
   });
 };
 

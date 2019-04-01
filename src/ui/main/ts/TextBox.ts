@@ -1,16 +1,14 @@
 /**
- * TextBox.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Tools from 'tinymce/core/api/util/Tools';
 import DomUtils from './DomUtils';
 import Widget from './Widget';
+import { document } from '@ephox/dom-globals';
 
 /**
  * Creates a new textbox.
@@ -147,7 +145,7 @@ export default Widget.extend({
 
     elm = DomUtils.create(settings.multiline ? 'textarea' : 'input', attrs);
     elm.value = self.state.get('value');
-    elm.className = self.classes;
+    elm.className = self.classes.toString();
 
     return elm.outerHTML;
   },

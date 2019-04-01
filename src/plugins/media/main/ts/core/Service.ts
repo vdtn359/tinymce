@@ -1,11 +1,8 @@
 /**
- * Service.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Promise from 'tinymce/core/api/util/Promise';
@@ -14,7 +11,7 @@ import DataToHtml from './DataToHtml';
 
 const cache = {};
 const embedPromise = function (data, dataToHtml, handler) {
-  return new Promise(function (res, rej) {
+  return new Promise<{url: string, html: string}>(function (res, rej) {
     const wrappedResolve = function (response) {
       if (response.html) {
         cache[data.source1] = response;
@@ -33,7 +30,7 @@ const embedPromise = function (data, dataToHtml, handler) {
 };
 
 const defaultPromise = function (data, dataToHtml) {
-  return new Promise(function (res) {
+  return new Promise<{url: string, html: string}>(function (res) {
     res({ html: dataToHtml(data), url: data.source1 });
   });
 };

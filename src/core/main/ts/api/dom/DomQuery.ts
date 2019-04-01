@@ -1,17 +1,15 @@
 /**
- * DomQuery.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import EventUtils from './EventUtils';
 import Sizzle from './Sizzle';
 import Env from '../Env';
 import Tools from '../util/Tools';
+import { document } from '@ephox/dom-globals';
 
 /**
  * This class mimics most of the jQuery API:
@@ -537,6 +535,8 @@ DomQuery.fn = DomQuery.prototype = {
           }
         } else if (elm.currentStyle) {
           return elm.currentStyle[camel(name)];
+        } else {
+          return '';
         }
       }
     }

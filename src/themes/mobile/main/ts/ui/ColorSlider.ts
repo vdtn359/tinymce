@@ -1,10 +1,17 @@
-import { Behaviour, Slider, Toggling } from '@ephox/alloy';
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
+import { Behaviour, Slider, Toggling, SketchSpec } from '@ephox/alloy';
 import { Css } from '@ephox/sugar';
 
 import Receivers from '../channels/Receivers';
 import Styles from '../style/Styles';
-import UiDomFactory from '../util/UiDomFactory';
-import ToolbarWidgets from './ToolbarWidgets';
+import * as UiDomFactory from '../util/UiDomFactory';
+import * as ToolbarWidgets from './ToolbarWidgets';
 
 const BLACK = -1;
 
@@ -77,7 +84,7 @@ const makeSlider = function (spec) {
   });
 };
 
-const makeItems = function (spec) {
+const makeItems = function (spec): SketchSpec[] {
   return [
     makeSlider(spec)
   ];

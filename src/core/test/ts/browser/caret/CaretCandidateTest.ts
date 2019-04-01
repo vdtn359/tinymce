@@ -6,6 +6,7 @@ import $ from 'tinymce/core/api/dom/DomQuery';
 import Zwsp from 'tinymce/core/text/Zwsp';
 import ViewBlock from '../../module/test/ViewBlock';
 import { UnitTest } from '@ephox/bedrock';
+import { document } from '@ephox/dom-globals';
 
 UnitTest.asynctest('browser.tinymce.core.CaretCandidateTest', function () {
   const success = arguments[arguments.length - 2];
@@ -32,6 +33,7 @@ UnitTest.asynctest('browser.tinymce.core.CaretCandidateTest', function () {
 
     LegacyUnit.equal(CaretCandidate.isCaretCandidate(document.createTextNode('text')), true);
     LegacyUnit.equal(CaretCandidate.isCaretCandidate($('<span contentEditable="false"></span>')[0]), true);
+    LegacyUnit.equal(CaretCandidate.isCaretCandidate($('<span contentEditable="false" unselectable="true"></span>')[0]), false);
     LegacyUnit.equal(CaretCandidate.isCaretCandidate($('<div contentEditable="false"></div>')[0]), true);
     LegacyUnit.equal(CaretCandidate.isCaretCandidate($('<table><tr><td>X</td></tr></table>')[0]), true);
     LegacyUnit.equal(CaretCandidate.isCaretCandidate($('<span contentEditable="true"></span>')[0]), false);

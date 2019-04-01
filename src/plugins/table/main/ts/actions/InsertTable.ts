@@ -1,11 +1,8 @@
 /**
- * InsertTable.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2018 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun, Arr, Type } from '@ephox/katamari';
@@ -13,8 +10,9 @@ import { TableRender } from '@ephox/snooker';
 import { Attr, Html, SelectorFind, SelectorFilter, Css } from '@ephox/sugar';
 import { getDefaultAttributes, getDefaultStyles, isPixelsForced } from '../api/Settings';
 import { fireNewRow, fireNewCell } from '../api/Events';
-import Util from '../alien/Util';
+import * as Util from '../alien/Util';
 import { Editor } from 'tinymce/core/api/Editor';
+import { HTMLElement } from '@ephox/dom-globals';
 
 const placeCaretInCell = (editor: Editor, cell) => {
   editor.selection.select(cell.dom(), true);
@@ -35,7 +33,7 @@ const fireEvents = (editor: Editor, table) => {
   });
 };
 
-const isPercentage = (width) => Type.isString(width) && width.indexOf('%') !== -1;
+const isPercentage = (width: string) => Type.isString(width) && width.indexOf('%') !== -1;
 
 const insert = (editor: Editor, columns: number, rows: number): HTMLElement => {
   const defaultStyles = getDefaultStyles(editor);

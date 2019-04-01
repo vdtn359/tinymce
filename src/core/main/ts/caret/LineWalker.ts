@@ -1,14 +1,11 @@
 /**
- * LineWalker.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import Arr from '../util/Arr';
+import ArrUtils from '../util/ArrUtils';
 import * as Dimensions from '../dom/Dimensions';
 import * as CaretCandidate from './CaretCandidate';
 import * as CaretUtils from './CaretUtils';
@@ -16,8 +13,9 @@ import { CaretWalker } from './CaretWalker';
 import CaretPosition from './CaretPosition';
 import * as ClientRect from '../geom/ClientRect';
 import { Fun } from '@ephox/katamari';
+import { Node } from '@ephox/dom-globals';
 
-export interface ClientRectLine extends ClientRect {
+export interface ClientRectLine extends ClientRect.ClientRect {
   line: number;
 }
 
@@ -26,7 +24,7 @@ export enum VDirection {
   Down = 1
 }
 
-type PosPredicate = (rect1: ClientRect, rect2: ClientRect) => boolean;
+type PosPredicate = (rect1: ClientRect.ClientRect, rect2: ClientRect.ClientRect) => boolean;
 type RectPredicate = (rect: ClientRectLine) => boolean;
 
 const findUntil = (direction: VDirection, root: Node, predicateFn: (node: Node) => boolean, node: Node): void => {
@@ -56,7 +54,7 @@ const walkUntil = (direction: VDirection, isAboveFn: PosPredicate, isBeflowFn: P
         continue;
       }
 
-      if (result.length > 0 && isAboveFn(clientRect, Arr.last(result))) {
+      if (result.length > 0 && isAboveFn(clientRect, ArrUtils.last(result))) {
         line++;
       }
 
@@ -70,7 +68,7 @@ const walkUntil = (direction: VDirection, isAboveFn: PosPredicate, isBeflowFn: P
     }
   };
 
-  targetClientRect = Arr.last(caretPosition.getClientRects());
+  targetClientRect = ArrUtils.last(caretPosition.getClientRects());
   if (!targetClientRect) {
     return result;
   }
@@ -96,10 +94,10 @@ const positionsUntil = (direction: VDirection, root: Node, predicateFn: RectPred
 
   const getClientRect = function (caretPosition) {
     if (direction === 1) {
-      return Arr.last(caretPosition.getClientRects());
+      return ArrUtils.last(caretPosition.getClientRects());
     }
 
-    return Arr.last(caretPosition.getClientRects());
+    return ArrUtils.last(caretPosition.getClientRects());
   };
 
   if (direction === 1) {
@@ -127,7 +125,7 @@ const positionsUntil = (direction: VDirection, root: Node, predicateFn: RectPred
       continue;
     }
 
-    if (result.length > 0 && isBelowFn(clientRect, Arr.last(result))) {
+    if (result.length > 0 && isBelowFn(clientRect, ArrUtils.last(result))) {
       line++;
     }
 

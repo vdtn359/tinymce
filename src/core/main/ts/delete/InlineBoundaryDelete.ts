@@ -1,11 +1,8 @@
 /**
- * InlineBoundaryDelete.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun, Option, Options } from '@ephox/katamari';
@@ -18,6 +15,7 @@ import BoundaryCaret from '../keyboard/BoundaryCaret';
 import BoundaryLocation from '../keyboard/BoundaryLocation';
 import BoundarySelection from '../keyboard/BoundarySelection';
 import InlineUtils from '../keyboard/InlineUtils';
+import { document } from '@ephox/dom-globals';
 
 const isFeatureEnabled = function (editor) {
   return editor.settings.inline_boundaries !== false;

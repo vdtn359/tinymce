@@ -1,4 +1,4 @@
-import { Assertions, GeneralSteps, Logger, Pipeline, Step } from '@ephox/agar';
+import { Assertions, GeneralSteps, Logger, Pipeline, Step, Keyboard, Keys } from '@ephox/agar';
 import { Arr } from '@ephox/katamari';
 import { TinyApis, TinyLoader } from '@ephox/mcagar';
 import { Remove, Replication, Element, Attr, Html, SelectorFilter } from '@ephox/sugar';
@@ -11,12 +11,6 @@ UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteTest', function () {
   const failure = arguments[arguments.length - 1];
 
   ModernTheme();
-
-  const sSetRawContent = function (editor, content) {
-    return Step.sync(function () {
-      editor.getBody().innerHTML = content;
-    });
-  };
 
   const sAssertRawNormalizedContent = function (editor, expectedContent) {
     return Step.sync(function () {
@@ -58,6 +52,10 @@ UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteTest', function () {
       const returnVal = TableDelete.backspaceDelete(editor, false);
       Assertions.assertEq('Should return false since the operation is a noop', false, returnVal);
     });
+  };
+
+  const sKeyboardBackspace = function (editor) {
+    return Keyboard.sKeystroke(Element.fromDom(editor.getDoc()), Keys.backspace(), {});
   };
 
   TinyLoader.setup(function (editor, onSuccess, onFailure) {
@@ -121,11 +119,18 @@ UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteTest', function () {
 
         Logger.t('Delete and empty cells', GeneralSteps.sequence([
           Logger.t('delete weird selection with th', GeneralSteps.sequence([
-            sSetRawContent(editor, '<table><tbody><tr><td><h1><br></h1></td></tr></tbody></table>'),
+            tinyApis.sSetRawContent('<table><tbody><tr><td><h1><br></h1></td></tr></tbody></table>'),
             tinyApis.sSetSelection([0, 0, 0, 0, 0], 0, [0, 0, 0, 0, 0], 0),
             sDelete(editor),
             sAssertRawNormalizedContent(editor, '<table><tbody><tr><td><br data-mce-bogus="1"></td></tr></tbody></table>')
           ]))
+        ])),
+
+        Logger.t('Delete partial selection across cells', GeneralSteps.sequence([
+          tinyApis.sSetRawContent('<table><tbody><tr><td><p>aa</p></td><td><p>bb</p></td><td><p>cc</p></td></tr></tbody></table>'),
+          tinyApis.sSetSelection([0, 0, 0, 0, 0, 0], 1, [0, 0, 0, 1, 0, 0], 1),
+          sKeyboardBackspace(editor),
+          sAssertRawNormalizedContent(editor, '<table><tbody><tr><td><br data-mce-bogus="1"></td><td><br data-mce-bogus="1"></td><td><p>cc</p></td></tr></tbody></table>')
         ]))
       ])),
 
@@ -219,7 +224,33 @@ UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteTest', function () {
           sDelete(editor),
           sAssertRawNormalizedContent(editor, '<table class="mce-item-table"><caption><br data-mce-bogus="1"></caption><tbody><tr><td>a</td></tr></tbody></table>')
         ]))
-      ]))
+      ])),
+
+      Logger.t('Delete partially selected tables', GeneralSteps.sequence([
+        Logger.t('Delete from before table into table', GeneralSteps.sequence([
+          tinyApis.sSetContent('<p>a</p><table><tbody><tr><td>a</td><td>b</td></tr></tbody></table>'),
+          tinyApis.sSetSelection([0, 0], 0, [1, 0, 0, 0, 0], 1),
+          sDelete(editor),
+          tinyApis.sAssertSelection([1, 0, 0, 0], 0, [1, 0, 0, 0], 0),
+          tinyApis.sAssertContent('<p>a</p><table><tbody><tr><td>&nbsp;</td><td>b</td></tr></tbody></table>')
+        ])),
+
+        Logger.t('Delete from after table into table', GeneralSteps.sequence([
+          tinyApis.sSetContent('<table><tbody><tr><td>a</td><td>b</td></tr></tbody></table><p>a</p>'),
+          tinyApis.sSetSelection([0, 0, 0, 1, 0], 1, [1, 0], 1),
+          sDelete(editor),
+          tinyApis.sAssertSelection([0, 0, 0, 1], 0, [0, 0, 0, 1], 0),
+          tinyApis.sAssertContent('<table><tbody><tr><td>a</td><td>&nbsp;</td></tr></tbody></table><p>a</p>')
+        ])),
+
+        Logger.t('Delete from one table into another table', GeneralSteps.sequence([
+          tinyApis.sSetContent('<table><tbody><tr><td>a</td><td>b</td></tr></tbody></table><table><tbody><tr><td>c</td><td>d</td></tr></tbody></table>'),
+          tinyApis.sSetSelection([0, 0, 0, 1, 0], 1, [1, 0, 0, 0, 0], 1),
+          sDelete(editor),
+          tinyApis.sAssertSelection([0, 0, 0, 1], 0, [0, 0, 0, 1], 0),
+          tinyApis.sAssertContent('<table><tbody><tr><td>a</td><td>&nbsp;</td></tr></tbody></table><table><tbody><tr><td>c</td><td>d</td></tr></tbody></table>')
+        ]))
+      ])),
     ], onSuccess, onFailure);
   }, {
     indent: false,

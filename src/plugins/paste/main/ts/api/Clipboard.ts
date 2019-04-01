@@ -1,9 +1,18 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { ClipboardContents, registerEventsAndFilters, pasteHtml, pasteText, pasteImageData, getDataTransferItems, hasContentType, hasHtmlOrText } from '../core/Clipboard';
 import { PasteBin } from '../core/PasteBin';
-import Settings from './Settings';
+import { Cell } from '@ephox/katamari';
+import { Editor } from 'tinymce/core/api/Editor';
+import { ClipboardEvent, DragEvent, Range, DataTransfer } from '@ephox/dom-globals';
 
 export interface Clipboard {
-  pasteFormat: string;
+  pasteFormat: Cell<string>;
   pasteHtml: (html: string, internalFlag: boolean) => void;
   pasteText: (text: string) => void;
   pasteImageData: (e: ClipboardEvent | DragEvent, rng: Range) => boolean;
@@ -12,10 +21,8 @@ export interface Clipboard {
   hasContentType: (clipboardContent: ClipboardContents, mimeType: string) => boolean;
 }
 
-export const Clipboard = (editor): Clipboard => {
+export const Clipboard = (editor: Editor, pasteFormat: Cell<string>): Clipboard => {
   const pasteBin = PasteBin(editor);
-
-  const pasteFormat = Settings.isPasteAsTextEnabled(editor) ? 'text' : 'html';
 
   editor.on('preInit', () => registerEventsAndFilters(editor, pasteBin, pasteFormat));
 

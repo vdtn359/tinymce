@@ -1,23 +1,27 @@
 /**
- * RemoveFormat.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import Bookmarks from '../dom/Bookmarks';
+import Bookmarks from '../bookmark/Bookmarks';
 import NodeType from '../dom/NodeType';
 import TreeWalker from '../api/dom/TreeWalker';
-import CaretFormat from './CaretFormat';
+import * as CaretFormat from './CaretFormat';
 import ExpandRange from './ExpandRange';
 import FormatUtils from './FormatUtils';
 import MatchFormat from './MatchFormat';
 import RangeWalk from '../selection/RangeWalk';
 import Tools from '../api/util/Tools';
 import { Selection } from '../api/dom/Selection';
+import GetBookmark from 'tinymce/core/bookmark/GetBookmark';
+import { Editor } from 'tinymce/core/api/Editor';
+import SplitRange from 'tinymce/core/selection/SplitRange';
+import { Node } from '@ephox/dom-globals';
+import { DOMUtils } from 'tinymce/core/api/dom/DOMUtils';
+import { Element, Traverse, InsertAll, Insert } from '@ephox/sugar';
+import { Option } from '@ephox/katamari';
 
 const MCE_ATTR_RE = /^(src|href|style)$/;
 const each = Tools.each;
@@ -25,6 +29,10 @@ const isEq = FormatUtils.isEq;
 
 const isTableCell = function (node) {
   return /^(TH|TD)$/.test(node.nodeName);
+};
+
+const isChildOfInlineParent = (dom: DOMUtils, node: Node, parent: Node): boolean => {
+  return dom.isChildOf(node, parent) && node !== parent && !dom.isBlock(parent);
 };
 
 const getContainer = function (ed, rng, start?) {
@@ -63,6 +71,23 @@ const wrap = function (dom, node, name, attrs?) {
   wrapper.appendChild(node);
 
   return wrapper;
+};
+
+const wrapWithSiblings = (dom: DOMUtils, node: Node, next: boolean, name: string, attrs?): Node => {
+  const start = Element.fromDom(node);
+  const wrapper = Element.fromDom(dom.create(name, attrs));
+  const siblings = next ? Traverse.nextSiblings(start) : Traverse.prevSiblings(start);
+
+  InsertAll.append(wrapper, siblings);
+  if (next) {
+    Insert.before(start, wrapper);
+    Insert.prepend(wrapper, start);
+  } else {
+    Insert.after(start, wrapper);
+    Insert.append(wrapper, start);
+  }
+
+  return wrapper.dom();
 };
 
 /**
@@ -348,7 +373,7 @@ const wrapAndSplit = function (editor, formatList, formatRoot, container, target
   return container;
 };
 
-const remove = function (ed, name, vars?, node?, similar?) {
+const remove = function (ed: Editor, name: string, vars?, node?, similar?) {
   const formatList = ed.formatter.get(name), format = formatList[0];
   let bookmark, rng, contentEditable = true;
   const dom = ed.dom;
@@ -357,6 +382,12 @@ const remove = function (ed, name, vars?, node?, similar?) {
   const splitToFormatRoot = function (container) {
     const formatRoot = findFormatRoot(ed, container, name, vars, similar);
     return wrapAndSplit(ed, formatList, formatRoot, container, container, true, format, vars);
+  };
+
+  const isRemoveBookmarkNode = function (node: Node) {
+    // Make sure to only check for bookmarks created here (eg _start or _end)
+    // as there maybe nested bookmarks
+    return Bookmarks.isBookmarkNode(node) && NodeType.isElement(node) && (node.id === '_start' || node.id === '_end');
   };
 
   // Merges the styles for each node
@@ -403,7 +434,7 @@ const remove = function (ed, name, vars?, node?, similar?) {
     // If the end is placed within the start the result will be removed
     // So this checks if the out node is a bookmark node if it is it
     // checks for another more suitable node
-    if (Bookmarks.isBookmarkNode(out)) {
+    if (isRemoveBookmarkNode(out)) {
       out = out[start ? 'firstChild' : 'lastChild'];
     }
 
@@ -424,6 +455,9 @@ const remove = function (ed, name, vars?, node?, similar?) {
     rng = ExpandRange.expandRng(ed, rng, formatList, true);
 
     if (format.split) {
+      // Split text nodes
+      rng = SplitRange.split(rng);
+
       startContainer = getContainer(ed, rng, true);
       endContainer = getContainer(ed, rng);
 
@@ -446,10 +480,19 @@ const remove = function (ed, name, vars?, node?, similar?) {
           endContainer = endContainer.firstChild || endContainer;
         }
 
-        if (dom.isChildOf(startContainer, endContainer) && startContainer !== endContainer && !dom.isBlock(endContainer) && !isTableCell(startContainer) && !isTableCell(endContainer)) {
-          startContainer = wrap(dom, startContainer, 'span', { 'id': '_start', 'data-mce-type': 'bookmark' });
-          splitToFormatRoot(startContainer);
-          startContainer = unwrap(true);
+        // Wrap and split if nested
+        if (isChildOfInlineParent(dom, startContainer, endContainer)) {
+          const marker = Option.from(startContainer.firstChild).getOr(startContainer);
+          splitToFormatRoot(wrapWithSiblings(dom, marker, true, 'span', { 'id': '_start', 'data-mce-type': 'bookmark' }));
+          unwrap(true);
+          return;
+        }
+
+        // Wrap and split if nested
+        if (isChildOfInlineParent(dom, endContainer, startContainer)) {
+          const marker = Option.from(endContainer.lastChild).getOr(endContainer);
+          splitToFormatRoot(wrapWithSiblings(dom, marker, false, 'span', { 'id': '_end', 'data-mce-type': 'bookmark' }));
+          unwrap(false);
           return;
         }
 
@@ -524,7 +567,7 @@ const remove = function (ed, name, vars?, node?, similar?) {
   }
 
   if (!selection.isCollapsed() || !format.inline || dom.select('td[data-mce-selected],th[data-mce-selected]').length) {
-    bookmark = selection.getBookmark();
+    bookmark = GetBookmark.getPersistentBookmark(ed.selection, true);
     removeRngStyle(selection.getRng());
     selection.moveToBookmark(bookmark);
 

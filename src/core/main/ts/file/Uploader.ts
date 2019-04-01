@@ -1,16 +1,16 @@
 /**
- * Uploader.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { XMLHttpRequest } from '@ephox/sand';
 import Promise from '../api/util/Promise';
 import Tools from '../api/util/Tools';
+import { FormData } from '@ephox/dom-globals';
+import { BlobInfo } from 'tinymce/core/api/file/BlobCache';
+import { Type } from '@ephox/katamari';
 
 /**
  * Upload blobs or blob infos to the specified URL or handler.
@@ -32,6 +32,8 @@ import Tools from '../api/util/Tools';
  * });
  */
 
+export type UploadHandler = (blobInfo: BlobInfo, success: (url: string) => void, failure: (err: string) => void, progress?: (percent: number) => void) => void;
+
 export default function (uploadStatus, settings) {
   const pendingPromises = {};
 
@@ -43,10 +45,10 @@ export default function (uploadStatus, settings) {
     return path2;
   };
 
-  const defaultHandler = function (blobInfo, success, failure, progress) {
+  const defaultHandler: UploadHandler = function (blobInfo, success, failure, progress) {
     let xhr, formData;
 
-    xhr = new XMLHttpRequest();
+    xhr = XMLHttpRequest();
     xhr.open('POST', settings.url);
     xhr.withCredentials = settings.credentials;
 
@@ -191,11 +193,9 @@ export default function (uploadStatus, settings) {
     return (!settings.url && isDefaultHandler(settings.handler)) ? noUpload() : uploadBlobs(blobInfos, openNotification);
   };
 
-  settings = Tools.extend({
-    credentials: false,
-    // We are adding a notify argument to this (at the moment, until it doesn't work)
-    handler: defaultHandler
-  }, settings);
+  if (Type.isFunction(settings.handler) === false) {
+    settings.handler = defaultHandler;
+  }
 
   return {
     upload

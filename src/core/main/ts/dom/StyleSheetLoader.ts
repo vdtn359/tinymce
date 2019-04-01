@@ -1,16 +1,14 @@
 /**
- * StyleSheetLoader.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Arr, Fun, Future, Futures, Result } from '@ephox/katamari';
 import Delay from '../api/util/Delay';
 import Tools from '../api/util/Tools';
+import { navigator } from '@ephox/dom-globals';
 
 /**
  * This class handles loading of external stylesheets and fires events when these are loaded.
@@ -19,12 +17,21 @@ import Tools from '../api/util/Tools';
  * @private
  */
 
-export default function (document, settings?) {
+export interface StyleSheetLoader {
+  load: (url: string, loadedCallback: Function, errorCallback?: Function) => void;
+  loadAll: (urls: string[], success: Function, failure: Function) => void;
+}
+
+export interface StyleSheetLoaderSettings {
+  maxLoadTime: number;
+  contentCssCors: boolean;
+}
+
+export function StyleSheetLoader(document, settings: Partial<StyleSheetLoaderSettings> = {}): StyleSheetLoader {
   let idCount = 0;
   const loadedStates = {};
   let maxLoadTime;
 
-  settings = settings || {};
   maxLoadTime = settings.maxLoadTime || 5000;
 
   const appendToHead = function (node) {
@@ -39,7 +46,7 @@ export default function (document, settings?) {
    * @param {Function} loadedCallback Callback to be executed when loaded.
    * @param {Function} errorCallback Callback to be executed when failed loading.
    */
-  const load = function (url, loadedCallback, errorCallback) {
+  const load = function (url: string, loadedCallback: Function, errorCallback?: Function) {
     let link, style, startTime, state;
 
     const passed = function () {
@@ -166,6 +173,10 @@ export default function (document, settings?) {
     link.defer = false;
     startTime = new Date().getTime();
 
+    if (settings.contentCssCors) {
+      link.crossOrigin = 'anonymous';
+    }
+
     // Feature detect onload on link element and sniff older webkits since it has an broken onload event
     if ('onload' in link && !isOldWebKit()) {
       link.onload = waitForWebKitLinkLoaded;
@@ -203,7 +214,7 @@ export default function (document, settings?) {
     return result.fold(Fun.identity, Fun.identity);
   };
 
-  const loadAll = function (urls, success, failure) {
+  const loadAll = function (urls: string[], success: Function, failure: Function) {
     Futures.par(Arr.map(urls, loadF)).get(function (result) {
       const parts = Arr.partition(result, function (r) {
         return r.isValue();

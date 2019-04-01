@@ -1,16 +1,14 @@
 /**
- * BookmarkManager.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun } from '@ephox/katamari';
-import Bookmarks from '../../dom/Bookmarks';
+import Bookmarks from '../../bookmark/Bookmarks';
 import { Selection } from './Selection';
+import { Node } from '@ephox/dom-globals';
 
 /**
  * This class handles selection bookmarks.
@@ -74,7 +72,7 @@ export namespace BookmarkManager {
    * @param {DOMNode} node DOM Node to check if it's a bookmark node or not.
    * @return {Boolean} true/false if the node is a bookmark node or not.
    */
-  export const isBookmarkNode = Bookmarks.isBookmarkNode;
+  export const isBookmarkNode = Bookmarks.isBookmarkNode as (node: Node) => boolean;
 }
 
 export default BookmarkManager;

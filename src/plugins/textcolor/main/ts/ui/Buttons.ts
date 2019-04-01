@@ -1,11 +1,8 @@
 /**
- * Buttons.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
@@ -38,15 +35,15 @@ const onPanelClick = function (editor, cols) {
     const currentColor = TextColor.getCurrentColor(editor, buttonCtrl.settings.format);
 
     const selectColor = function (value) {
+      editor.execCommand('mceApplyTextcolor', buttonCtrl.settings.format, value);
       buttonCtrl.hidePanel();
       buttonCtrl.color(value);
-      editor.execCommand('mceApplyTextcolor', buttonCtrl.settings.format, value);
     };
 
     const resetColor = function () {
+      editor.execCommand('mceRemoveTextcolor', buttonCtrl.settings.format);
       buttonCtrl.hidePanel();
       buttonCtrl.resetColor();
-      editor.execCommand('mceRemoveTextcolor', buttonCtrl.settings.format);
     };
 
     if (DOMUtils.DOM.getParent(e.target, '.mce-custom-color-btn')) {
@@ -85,7 +82,7 @@ const onPanelClick = function (editor, cols) {
     value = e.target.getAttribute('data-mce-color');
     if (value) {
       if (this.lastId) {
-        DOMUtils.DOM.get(this.lastId).setAttribute('aria-selected', false);
+        DOMUtils.DOM.get(this.lastId).setAttribute('aria-selected', 'false');
       }
 
       e.target.setAttribute('aria-selected', true);

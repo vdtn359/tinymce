@@ -6,6 +6,7 @@ import HtmlUtils from '../module/test/HtmlUtils';
 import URI from 'tinymce/core/api/util/URI';
 import Theme from 'tinymce/themes/modern/Theme';
 import { UnitTest } from '@ephox/bedrock';
+import { document } from '@ephox/dom-globals';
 
 UnitTest.asynctest('browser.tinymce.core.EditorTest', function () {
   const success = arguments[arguments.length - 2];
@@ -422,6 +423,22 @@ UnitTest.asynctest('browser.tinymce.core.EditorTest', function () {
   suite.test('Preserve whitespace pre elements', function (editor) {
     editor.setContent('<pre> </pre>');
     LegacyUnit.equal(editor.getContent(), '<pre> </pre>');
+  });
+
+  suite.test('hasFocus', function (editor) {
+    editor.focus();
+    LegacyUnit.equal(editor.hasFocus(), true);
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+
+    input.focus();
+    LegacyUnit.equal(editor.hasFocus(), false);
+
+    editor.focus();
+    LegacyUnit.equal(editor.hasFocus(), true);
+
+    input.parentNode.removeChild(input);
   });
 
   TinyLoader.setup(function (editor, onSuccess, onFailure) {

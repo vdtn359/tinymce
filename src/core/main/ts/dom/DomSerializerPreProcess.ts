@@ -1,18 +1,17 @@
 /**
- * DomSerializerPreProcess.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Merger } from '@ephox/katamari';
 import Events from '../api/Events';
 import Tools from '../api/util/Tools';
+import { Editor } from 'tinymce/core/api/Editor';
+import { document } from '@ephox/dom-globals';
 
-const preProcess = function (editor, node, args) {
+const preProcess = function (editor: Editor, node, args) {
   let impl, doc, oldDoc;
   const dom = editor.dom;
 

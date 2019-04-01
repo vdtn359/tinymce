@@ -1,11 +1,8 @@
 /**
- * Render.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Type } from '@ephox/katamari';
@@ -20,6 +17,7 @@ import Init from './Init';
 import PluginManager from '../api/PluginManager';
 import ThemeManager from '../api/ThemeManager';
 import Tools from '../api/util/Tools';
+import { window } from '@ephox/dom-globals';
 
 const DOM = DOMUtils.DOM;
 

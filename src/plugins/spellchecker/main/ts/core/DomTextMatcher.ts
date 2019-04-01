@@ -1,18 +1,37 @@
 /**
- * DomTextMatcher.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
+
+import { HTMLElement, Range } from '@ephox/dom-globals';
 
 function isContentEditableFalse(node) {
   return node && node.nodeType === 1 && node.contentEditable === 'false';
 }
 
-export default function (node, editor) {
+export type Match = Record<string, string>;
+
+export interface DomTextMatcher {
+    text: string;
+    matches: string[];
+    each: (cb: Function) => DomTextMatcher;
+    filter: (cb: Function) => DomTextMatcher;
+    reset: () => DomTextMatcher;
+    matchFromElement: (element: HTMLElement) => Match;
+    elementFromMatch: (match: Match) => HTMLElement;
+    find: (regex: RegExp, data: Record<string, string>) => DomTextMatcher;
+    add: (start: number, length: number, data: Record<string, string>) => DomTextMatcher;
+    wrap: (cb: Function) => DomTextMatcher;
+    unwrap: (match?: Match) => DomTextMatcher;
+    replace: (match: Match, text: string) => Range
+    ;
+    rangeFromMatch: (match: Match) => Range;
+    indexOf: (match: Match) => number;
+}
+
+export const DomTextMatcher = function (node, editor): DomTextMatcher {
   let m, matches = [], text;
   const dom = editor.dom;
   let blockElementsMap, hiddenTextElementsMap, shortEndedElementsMap;
@@ -473,4 +492,4 @@ export default function (node, editor) {
     rangeFromMatch,
     indexOf
   };
-}
+};

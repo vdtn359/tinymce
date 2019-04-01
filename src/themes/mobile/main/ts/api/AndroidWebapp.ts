@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { GuiFactory } from '@ephox/alloy';
 import { ValueSchema } from '@ephox/boulder';
 import { Fun } from '@ephox/katamari';
@@ -6,9 +13,10 @@ import { Css, Insert } from '@ephox/sugar';
 import AndroidMode from '../android/core/AndroidMode';
 import TapToEditMask from '../touch/view/TapToEditMask';
 import MobileSchema from './MobileSchema';
+import { MobileWebApp } from 'tinymce/themes/mobile/api/IosWebapp';
 
 // TODO: Remove dupe with IosWebapp
-const produce = function (raw) {
+const produce = function (raw: {any}): MobileWebApp {
   const mobile = ValueSchema.asRawOrDie(
     'Getting AndroidWebapp schema',
     MobileSchema,
@@ -20,7 +28,7 @@ const produce = function (raw) {
 
   // We do not make the Android container relative, because we aren't positioning the toolbar absolutely.
   const onTap = function () {
-    mobile.setReadOnly(true);
+    mobile.setReadOnly(mobile.readOnlyOnInit());
     mode.enter();
   };
 

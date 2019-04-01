@@ -1,11 +1,8 @@
 /**
- * Buttons.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import { Fun } from '@ephox/katamari';
@@ -15,7 +12,7 @@ import { Clipboard } from '../api/Clipboard';
 const stateChange = function (editor: Editor, clipboard: Clipboard, e) {
   const ctrl = e.control;
 
-  ctrl.active(clipboard.pasteFormat === 'text');
+  ctrl.active(clipboard.pasteFormat.get() === 'text');
 
   editor.on('PastePlainTextToggle', function (e) {
     ctrl.active(e.state);

@@ -1,14 +1,11 @@
 /**
- * ControlSelection.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import { Element, Selectors } from '@ephox/sugar';
+import { Element as SugarElement, Selectors } from '@ephox/sugar';
 import NodeType from '../../dom/NodeType';
 import RangePoint from '../../dom/RangePoint';
 import Env from '../Env';
@@ -16,6 +13,9 @@ import Delay from '../util/Delay';
 import Tools from '../util/Tools';
 import VK from '../util/VK';
 import { Selection } from './Selection';
+import { Editor } from 'tinymce/core/api/Editor';
+import Events from 'tinymce/core/api/Events';
+import { Element, Event, Node, document } from '@ephox/dom-globals';
 
 interface ControlSelection {
   isResizable: (elm: Element) => boolean;
@@ -48,7 +48,7 @@ const getContentEditableRoot = function (root: Node, node: Node) {
   return null;
 };
 
-const ControlSelection = (selection: Selection, editor): ControlSelection => {
+const ControlSelection = (selection: Selection, editor: Editor): ControlSelection => {
   const dom = editor.dom, each = Tools.each;
   let selectedElm, selectedElmGhost, resizeHelper, resizeHandles, selectedHandle;
   let startX, startY, selectedElmX, selectedElmY, startW, startH, ratio, resizeStarted;
@@ -159,7 +159,7 @@ const ControlSelection = (selection: Selection, editor): ControlSelection => {
       return false;
     }
 
-    return Selectors.is(Element.fromDom(elm), selector);
+    return Selectors.is(SugarElement.fromDom(elm), selector);
   };
 
   const resizeGhostElement = function (e) {
@@ -238,7 +238,7 @@ const ControlSelection = (selection: Selection, editor): ControlSelection => {
     }
 
     if (!resizeStarted) {
-      editor.fire('ObjectResizeStart', { target: selectedElm, width: startW, height: startH });
+      Events.fireObjectResizeStart(editor, selectedElm, startW, startH);
       resizeStarted = true;
     }
   };
@@ -275,7 +275,7 @@ const ControlSelection = (selection: Selection, editor): ControlSelection => {
 
     showResizeRect(selectedElm);
 
-    editor.fire('ObjectResized', { target: selectedElm, width, height });
+    Events.fireObjectResized(editor, selectedElm, width, height);
     dom.setAttrib(selectedElm, 'style', dom.getAttrib(selectedElm, 'style'));
     editor.nodeChanged();
   };
@@ -367,7 +367,8 @@ const ControlSelection = (selection: Selection, editor): ControlSelection => {
 
         // Hides IE move layer cursor
         // If we set it on Chrome we get this wounderful bug: #6725
-        if (Env.ie) {
+        // Edge doesn't have this issue however setting contenteditable will move the selection to that element on Edge 17 see #TINY-1679
+        if (Env.ie === 11) {
           handleElm.contentEditable = false;
         }
 

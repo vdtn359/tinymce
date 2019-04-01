@@ -1,18 +1,16 @@
 /**
- * SkinLoader.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
 import Events from '../api/Events';
 import Settings from '../api/Settings';
+import { Editor } from 'tinymce/core/api/Editor';
 
-const fireSkinLoaded = function (editor, callback) {
+const fireSkinLoaded = function (editor: Editor, callback: Function) {
   const done = function () {
     editor._skinLoaded = true;
     Events.fireSkinLoaded(editor);
@@ -26,7 +24,7 @@ const fireSkinLoaded = function (editor, callback) {
   }
 };
 
-const load = function (editor, callback) {
+const load = function (editor: Editor, callback: Function) {
   const skinUrl = Settings.getSkinUrl(editor);
 
   const done = function () {

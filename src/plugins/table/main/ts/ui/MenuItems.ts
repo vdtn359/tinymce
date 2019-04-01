@@ -1,23 +1,21 @@
 /**
- * MenuItems.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import { Arr, Fun, Option } from '@ephox/katamari';
+import { Arr, Option } from '@ephox/katamari';
 import { TableLookup } from '@ephox/snooker';
 import { Element } from '@ephox/sugar';
 
 import InsertTable from '../actions/InsertTable';
 import TableTargets from '../queries/TableTargets';
-import TableDialog from './TableDialog';
 import { hasTableGrid } from '../api/Settings';
+import { Editor } from 'tinymce/core/api/Editor';
+import { Selections } from 'tinymce/plugins/table/selection/Selections';
 
-const addMenuItems = function (editor, selections) {
+const addMenuItems = function (editor: Editor, selections: Selections) {
   let targets = Option.none();
 
   const tableCtrls = [];
@@ -160,7 +158,7 @@ const addMenuItems = function (editor, selections) {
     text: 'Table',
     icon: 'table',
     context: 'table',
-    onclick: Fun.curry(TableDialog.open, editor)
+    onclick: cmd('mceInsertTable')
   } : {
     text: 'Table',
     icon: 'table',
@@ -170,7 +168,7 @@ const addMenuItems = function (editor, selections) {
       if (e.aria) {
         this.parent().hideAll();
         e.stopImmediatePropagation();
-        TableDialog.open(editor);
+        editor.execCommand('mceInsertTable');
       }
     },
     onshow () {
@@ -240,7 +238,7 @@ const addMenuItems = function (editor, selections) {
     text: 'Table properties',
     context: 'table',
     onPostRender: pushTable,
-    onclick: Fun.curry(TableDialog.open, editor, true)
+    onclick: cmd('mceTableProps')
   };
 
   const deleteTable = {

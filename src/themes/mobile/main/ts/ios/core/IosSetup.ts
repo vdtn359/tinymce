@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
 import { Fun, Option, Throttler } from '@ephox/katamari';
 import { Body, Css, DomEvent, Element, Focus } from '@ephox/sugar';
 
@@ -86,6 +93,21 @@ const register = function (toolstrip, socket, container, outerWindow, structure,
     unbind: onScroll.unbind
   };
 };
+
+export interface IosApi {
+  toEditing: () => void;
+  toReading: () => void;
+  onToolbarTouch: (event: any) => void;
+  refreshSelection: () => void;
+  clearSelection: () => void;
+  highlightSelection: () => void;
+  scrollIntoView: (top: any, bottom: any) => void;
+  updateToolbarPadding: (...x: any[]) => void;
+  setViewportOffset: (newYOffset: any) => void;
+  syncHeight: () => void;
+  refreshStructure: () => void;
+  destroy: () => void;
+}
 
 const setup = function (bag) {
   const cWin = bag.cWin();

@@ -1,19 +1,18 @@
 /**
- * Buttons.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Conversions from '../file/Conversions';
 import Picker from '../file/Picker';
 import Actions from '../core/Actions';
+import { Editor } from 'tinymce/core/api/Editor';
+import { InlitePanel } from 'tinymce/themes/inlite/ui/Panel';
 
-const addHeaderButtons = function (editor) {
-  const formatBlock = function (name) {
+const addHeaderButtons = function (editor: Editor) {
+  const formatBlock = function (name: string) {
     return function () {
       Actions.formatBlock(editor, name);
     };
@@ -36,7 +35,7 @@ const addHeaderButtons = function (editor) {
   }
 };
 
-const addToEditor = function (editor, panel) {
+const addToEditor = function (editor: Editor, panel: InlitePanel) {
   editor.addButton('quicklink', {
     icon: 'link',
     tooltip: 'Insert/Edit link',

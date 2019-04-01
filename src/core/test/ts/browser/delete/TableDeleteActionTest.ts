@@ -1,8 +1,9 @@
 import { Assertions, Chain, Logger, Pipeline } from '@ephox/agar';
-import { Arr, Fun, Result } from '@ephox/katamari';
+import { Arr, Fun, Result, Option } from '@ephox/katamari';
 import { Hierarchy,  Element,  Html } from '@ephox/sugar';
 import TableDeleteAction from 'tinymce/core/delete/TableDeleteAction';
 import { UnitTest } from '@ephox/bedrock';
+import { document } from '@ephox/dom-globals';
 
 UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteActionTest', function () {
   const success = arguments[arguments.length - 2];
@@ -26,11 +27,11 @@ UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteActionTest', function
     return Fun.constant(Result.error(message));
   };
 
-  const cAssertNone = Chain.op(function (x) {
+  const cAssertNone = Chain.op(function (x: Option<any>) {
     Assertions.assertEq('Is none', true, x.isNone());
   });
 
-  const cExtractActionCells = Chain.binder(function (actionOpt) {
+  const cExtractActionCells = Chain.binder(function (actionOpt: Option<any>) {
     return actionOpt
         .fold(
           fail('unexpected nothing'),
@@ -47,7 +48,7 @@ UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteActionTest', function
         );
   });
 
-  const cExtractTableFromDeleteAction = Chain.binder(function (actionOpt) {
+  const cExtractTableFromDeleteAction = Chain.binder(function (actionOpt: Option<any>) {
     return actionOpt
       .fold(
         fail('unexpected nothing'),
@@ -102,7 +103,34 @@ UnitTest.asynctest('browser.tinymce.core.delete.TableDeleteActionTest', function
       ),
       cExtractTableFromDeleteAction,
       Assertions.cAssertEq('should be table', '<table><tbody><tr><th>a</th><th>b</th><th>c</th></tr><tr><td>d</td><td>e</td><td>f</td></tr></tbody></table>')
-    ]))
+    ])),
+
+    Logger.t('select between two tables', Chain.asStep({}, [
+      cFromHtml(
+        '<div><table><tbody><tr><td>a</td></tr></tbody></table><table><tbody><tr><td>b</td></tr></tbody></table></div>',
+        [0, 0, 0, 0, 0], 0, [1, 0, 0, 0, 0], 1,
+      ),
+      cExtractTableFromDeleteAction,
+      Assertions.cAssertEq('should be cell from first table only', '<table><tbody><tr><td>a</td></tr></tbody></table>')
+    ])),
+
+    Logger.t('select between two tables', Chain.asStep({}, [
+      cFromHtml(
+        '<div><table><tbody><tr><td>a</td></tr></tbody></table>b',
+        [0, 0, 0, 0, 0], 0, [1], 1,
+      ),
+      cExtractTableFromDeleteAction,
+      Assertions.cAssertEq('should cells from partially selected table', '<table><tbody><tr><td>a</td></tr></tbody></table>')
+    ])),
+
+    Logger.t('select between two tables', Chain.asStep({}, [
+      cFromHtml(
+        '<div>a<table><tbody><tr><td>b</td></tr></tbody></table>',
+        [0], 0, [1, 0, 0, 0, 0], 1,
+      ),
+      cExtractTableFromDeleteAction,
+      Assertions.cAssertEq('should cells from partially selected table', '<table><tbody><tr><td>b</td></tr></tbody></table>')
+    ])),
   ], function () {
     success();
   }, failure);

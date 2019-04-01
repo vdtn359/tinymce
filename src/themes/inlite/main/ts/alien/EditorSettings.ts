@@ -1,14 +1,12 @@
 /**
- * EditorSettings.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
 import Type from './Type';
+import { Editor } from 'tinymce/core/api/Editor';
 
 const validDefaultOrDie = function (value, predicate) {
   if (predicate(value)) {
@@ -19,14 +17,14 @@ const validDefaultOrDie = function (value, predicate) {
 };
 
 const getByTypeOr = function (predicate) {
-  return function (editor, name, defaultValue) {
+  return function (editor: Editor, name: string, defaultValue) {
     const settings = editor.settings;
     validDefaultOrDie(defaultValue, predicate);
     return name in settings && predicate(settings[name]) ? settings[name] : defaultValue;
   };
 };
 
-const splitNoEmpty = function (str, delim) {
+const splitNoEmpty = function (str: string, delim: RegExp) {
   return str.split(delim).filter(function (item) {
     return item.length > 0;
   });
@@ -37,7 +35,7 @@ const itemsToArray = function (value, defaultValue) {
     return typeof value === 'string' ? splitNoEmpty(value, /[ ,]/) : value;
   };
 
-  const boolToItemsArray = function (value, defaultValue) {
+  const boolToItemsArray = function (value: boolean, defaultValue) {
     return value === false ? [] : defaultValue;
   };
 
@@ -53,7 +51,7 @@ const itemsToArray = function (value, defaultValue) {
 };
 
 const getToolbarItemsOr = function (predicate) {
-  return function (editor, name, defaultValue) {
+  return function (editor: Editor, name: string, defaultValue) {
     const value = name in editor.settings ? editor.settings[name] : defaultValue;
     validDefaultOrDie(defaultValue, predicate);
     return itemsToArray(value, defaultValue);

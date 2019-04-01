@@ -1,15 +1,13 @@
 /**
- * ElementUtils.js
- *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
  */
 
-import Bookmarks from '../../dom/Bookmarks';
+import Bookmarks from '../../bookmark/Bookmarks';
 import Tools from '../util/Tools';
+import { DOMUtils } from 'tinymce/core/api/dom/DOMUtils';
 
 /**
  * Utility class for various element specific functions.
@@ -20,7 +18,7 @@ import Tools from '../util/Tools';
 
 const each = Tools.each;
 
-const ElementUtils = function (dom) {
+const ElementUtils = function (dom: DOMUtils) {
   /**
    * Compares two nodes and checks if it's attributes and styles matches.
    * This doesn't compare classes as items since their order is significant.
