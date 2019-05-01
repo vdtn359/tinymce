@@ -373,17 +373,15 @@ var link = (function (domGlobals) {
       if (value = dom.getAttrib(anchorElm, 'title')) {
         data.title = value;
       }
-      if (onlyText) {
-        textListCtrl = {
-          name: 'text',
-          type: 'textbox',
-          size: 40,
-          label: 'Text to display',
-          onchange: function () {
-            data.text = this.value();
-          }
-        };
-      }
+      textListCtrl = {
+        name: 'text',
+        type: 'textbox',
+        size: 40,
+        label: 'Text to display',
+        onchange: function () {
+          data.text = this.value();
+        }
+      };
       if (linkList) {
         linkListCtrl = {
           type: 'listbox',

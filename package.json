@@ -1,6 +1,6 @@
 {
   "name": "tinymce",
-  "version": "4.9.3-accelo.1",
+  "version": "4.9.3-accelo.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/tinymce/tinymce.git"
@@ -18,7 +18,7 @@
   "scripts": {
     "test": "grunt bedrock-auto:chrome-headless",
     "lint": "tslint src/**/*.ts",
-    "postinstall": "rimraf node_modules/@ephox/alloy/node_modules && rimraf node_modules/@ephox/boulder/node_modules"
+    "postinstall": "rimraf node_modules/@ephox/*/node_modules"
   },
   "dependencies": {
     "@ephox/alloy": "2.2.3",
