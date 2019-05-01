@@ -1,4 +1,4 @@
-// 4.9.3 (2019-01-31)
+// 4.9.3-accelo.2 (2019-04-02)
 (function () {
 (function (domGlobals) {
     'use strict';
@@ -25691,8 +25691,8 @@
       defaultSettings: {},
       $: DomQuery,
       majorVersion: '4',
-      minorVersion: '9.3',
-      releaseDate: '2019-01-31',
+      minorVersion: '9.3-accelo.2',
+      releaseDate: '2019-04-02',
       editors: legacyEditors,
       i18n: I18n,
       activeEditor: null,
